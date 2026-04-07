@@ -8,119 +8,35 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <div class="topbar-main">
-        <p class="eyebrow">Simulación docente</p>
-        <h1>Monitor ECG</h1>
-        <p class="topbar-subtitle">Monitor clínico claro, compacto y orientado al reconocimiento de patrones.</p>
+  <main class="app-shell">
+    <section class="panel panel-monitor">
+      <div class="monitor-header">
+        <div class="monitor-labels">
+          <p class="eyebrow">Simulación docente</p>
+          <h1 id="currentRhythmLabel">Ritmo sinusal</h1>
+        </div>
       </div>
-    </header>
 
-    <main class="layout">
-      <section class="panel panel-monitor">
-        <div class="monitor-header">
-          <div class="monitor-stats">
-            <div class="stat stat-primary">
-              <span class="stat-label">Patrón</span>
-              <strong id="currentRhythmLabel">Ritmo sinusal</strong>
-            </div>
-            <div class="stat">
-              <span class="stat-label">FC</span>
-              <strong><span id="heartRateValue">75</span> lpm</strong>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Ganancia</span>
-              <strong><span id="gainValue">10</span> mm/mV</strong>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Velocidad</span>
-              <strong><span id="speedValue">25</span> mm/s</strong>
-            </div>
-          </div>
-          <div class="monitor-actions">
-            <button id="pauseBtn" class="ghost-btn" type="button" aria-pressed="false">Pausar</button>
-          </div>
+      <div class="monitor-device">
+        <div class="monitor-frame">
+          <canvas id="ecgCanvas" width="1400" height="520" aria-label="Monitor de ECG"></canvas>
         </div>
+      </div>
+    </section>
 
-        <div id="quickPicks" class="quick-picks"></div>
+    <aside class="panel panel-controls">
+      <div class="controls-block">
+        <label for="rhythmSelect">Ritmo / patrón ECG</label>
+        <select id="rhythmSelect"></select>
+      </div>
 
-        <div class="monitor-device">
-          <div class="monitor-toolbar">
-            <div class="toolbar-group">
-              <span class="toolbar-pill toolbar-pill-live"><span class="led"></span><span id="liveStatusText">Activo</span></span>
-              <span class="toolbar-pill">DI simulada</span>
-              <span class="toolbar-pill" id="monitorModeLabel">Ritmo regular</span>
-            </div>
-            <div class="toolbar-group">
-              <span class="toolbar-pill"><span id="toolbarSpeedValue">25</span> mm/s</span>
-              <span class="toolbar-pill"><span id="toolbarGainValue">10</span> mm/mV</span>
-              <span class="toolbar-pill">Ruido <span id="toolbarNoiseValue">0.01</span></span>
-            </div>
-          </div>
+      <div class="controls-block grow-block">
+        <label for="infoText">Descripción</label>
+        <article id="infoText" class="info-box"></article>
+      </div>
+    </aside>
+  </main>
 
-          <div class="monitor-frame">
-            <canvas id="ecgCanvas" width="1400" height="520" aria-label="Monitor de ECG"></canvas>
-            <div class="monitor-overlay"><span id="overlayText">Monitor activo</span></div>
-          </div>
-        </div>
-
-        <div class="legend">
-          <span><i class="legend-line"></i> Traza sintética</span>
-          <span id="legendHint">Espacio: pausar · G: retícula · B: deriva basal</span>
-        </div>
-      </section>
-
-      <aside class="panel panel-controls">
-        <div class="controls-header">
-          <h2>Ajustes</h2>
-          <span class="controls-note">Una derivación con fin exclusivamente docente</span>
-        </div>
-
-        <div class="controls-block">
-          <label for="rhythmSelect">Ritmo / patrón ECG</label>
-          <select id="rhythmSelect"></select>
-        </div>
-
-        <div class="controls-grid">
-          <div class="controls-block">
-            <label for="heartRateRange">Frecuencia cardiaca</label>
-            <input id="heartRateRange" type="range" min="20" max="220" step="1" value="75" />
-          </div>
-          <div class="controls-block">
-            <label for="speedRange">Velocidad del papel</label>
-            <input id="speedRange" type="range" min="12.5" max="50" step="12.5" value="25" />
-          </div>
-          <div class="controls-block">
-            <label for="gainRange">Ganancia</label>
-            <input id="gainRange" type="range" min="5" max="20" step="5" value="10" />
-          </div>
-          <div class="controls-block">
-            <label for="noiseRange">Ruido</label>
-            <input id="noiseRange" type="range" min="0" max="0.1" step="0.005" value="0.01" />
-          </div>
-        </div>
-
-        <div class="switches-card">
-          <div class="switches">
-            <label class="switch-row"><input id="baselineToggle" type="checkbox" checked /><span>Deriva de línea de base</span></label>
-            <label class="switch-row"><input id="gridToggle" type="checkbox" checked /><span>Mostrar retícula</span></label>
-          </div>
-        </div>
-
-        <div class="summary-card">
-          <div class="summary-row"><span>Ritmo estimado</span><strong id="summaryRhythm">Regular</strong></div>
-          <div class="summary-row"><span>QRS</span><strong id="summaryQrs">Estrecho</strong></div>
-          <div class="summary-row"><span>Actividad auricular</span><strong id="summaryAtrial">Visible</strong></div>
-        </div>
-
-        <div class="controls-block grow-block">
-          <label for="infoText">Descripción docente</label>
-          <article id="infoText" class="info-box"></article>
-        </div>
-      </aside>
-    </main>
-  </div>
   <script src="app.js"></script>
 </body>
 </html>
