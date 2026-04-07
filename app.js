@@ -91,8 +91,7 @@ const state = {
   showGrid: true,
   paused: false,
   phase: 0,
-  lastTime: performance.now(),
-  sampleBuffer: []
+  lastTime: performance.now()
 };
 
 const canvas = document.getElementById('ecgCanvas');
@@ -177,8 +176,20 @@ function smoothPlateau(t, start, end, amplitude) {
 }
 
 function sampleBeat(phase, beat, duration) {
-  const normalized = (phase % duration) / duration;
+  const normalized = ((phase % duration) + duration) % duration / duration;
   return renderBeatShape(normalized, beat);
+}
+
+function flutterWave(timeSec, atrialRate) {
+  const hz = atrialRate / 60;
+  const x = (timeSec * hz) % 1;
+  return x < 0.6 ? x / 0.6 : -(x - 0.6) / 0.4;
+}
+
+function irregularBeatDuration(timeSec, baseHr) {
+  const base = 60 / Math.max(1, baseHr);
+  const mod = 0.22 * Math.sin(timeSec * 2.1) + 0.14 * Math.sin(timeSec * 3.7);
+  return Math.max(base * 0.55, base * (1 + mod));
 }
 
 function sampleRhythm(timeSec) {
@@ -214,15 +225,13 @@ function sampleRhythm(timeSec) {
       const baseDuration = 60 / Math.max(1, state.heartRate);
       const seq = rhythm.sequence;
       const cycleLen = seq.length * baseDuration;
-      const tInCycle = timeSec % cycleLen;
+      const tInCycle = ((timeSec % cycleLen) + cycleLen) % cycleLen;
       const index = Math.floor(tInCycle / baseDuration);
       const type = seq[index];
       const localTime = tInCycle - index * baseDuration;
-      if (type === 'pvc') {
-        y = sampleBeat(localTime + baseDuration * (1 - rhythm.pvcOffset), rhythm.pvcBeat, baseDuration);
-      } else {
-        y = sampleBeat(localTime, rhythm.normalBeat, baseDuration);
-      }
+      y = type === 'pvc'
+        ? sampleBeat(localTime + baseDuration * (1 - rhythm.pvcOffset), rhythm.pvcBeat, baseDuration)
+        : sampleBeat(localTime, rhythm.normalBeat, baseDuration);
       break;
     }
 
@@ -230,7 +239,7 @@ function sampleRhythm(timeSec) {
       const baseDuration = 60 / Math.max(1, state.heartRate);
       const cycle = rhythm.cycle;
       const cycleLen = cycle.length * baseDuration;
-      const tInCycle = timeSec % cycleLen;
+      const tInCycle = ((timeSec % cycleLen) + cycleLen) % cycleLen;
       const index = Math.floor(tInCycle / baseDuration);
       const local = tInCycle - index * baseDuration;
       const pr = cycle[index];
@@ -245,8 +254,8 @@ function sampleRhythm(timeSec) {
     case 'completeBlock': {
       const atrialDuration = 60 / rhythm.atrialRate;
       const ventricularDuration = 60 / rhythm.ventricularRate;
-      const pPhase = (timeSec % atrialDuration) / atrialDuration;
-      const qrsPhase = (timeSec % ventricularDuration) / ventricularDuration;
+      const pPhase = ((timeSec % atrialDuration) + atrialDuration) % atrialDuration / atrialDuration;
+      const qrsPhase = ((timeSec % ventricularDuration) + ventricularDuration) % ventricularDuration / ventricularDuration;
       y += gaussian(pPhase, 0.18, rhythm.atrialBeat.pWidth || 0.08, rhythm.atrialBeat.pAmp || 0.1);
       y += renderBeatShape(qrsPhase, rhythm.ventricularBeat);
       break;
@@ -256,44 +265,38 @@ function sampleRhythm(timeSec) {
       y = 0;
   }
 
-  y += wander + randomNoise(state.noise);
-  return y;
+  return y + wander + randomNoise(state.noise);
 }
 
-function flutterWave(timeSec, atrialRate) {
-  const hz = atrialRate / 60;
-  const x = (timeSec * hz) % 1;
-  return x < 0.6 ? x / 0.6 : -(x - 0.6) / 0.4;
-}
-
-function irregularBeatDuration(timeSec, baseHr) {
-  const base = 60 / Math.max(1, baseHr);
-  const mod = 0.22 * Math.sin(timeSec * 2.1) + 0.14 * Math.sin(timeSec * 3.7);
-  return Math.max(base * 0.55, base * (1 + mod));
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
 
 function resizeCanvas() {
   const ratio = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width * ratio;
-  canvas.height = rect.height * ratio;
+  const width = Math.max(1, Math.floor(rect.width));
+  const height = Math.max(1, Math.floor(rect.height));
+  canvas.width = width * ratio;
+  canvas.height = height * ratio;
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 }
 
 function drawGrid(width, height) {
   if (!state.showGrid) return;
-  const small = 16;
+  const small = 18;
   const large = small * 5;
   ctx.save();
+  ctx.lineWidth = 1;
   for (let x = 0; x <= width; x += small) {
-    ctx.strokeStyle = x % large === 0 ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)';
+    ctx.strokeStyle = x % large === 0 ? 'rgba(85, 120, 145, 0.14)' : 'rgba(85, 120, 145, 0.06)';
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x, height);
     ctx.stroke();
   }
   for (let y = 0; y <= height; y += small) {
-    ctx.strokeStyle = y % large === 0 ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)';
+    ctx.strokeStyle = y % large === 0 ? 'rgba(85, 120, 145, 0.14)' : 'rgba(85, 120, 145, 0.06)';
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
@@ -303,30 +306,34 @@ function drawGrid(width, height) {
 }
 
 function drawTrace(width, height) {
-  const baselineY = height * 0.55;
+  const baselineY = height * 0.52;
   const pxPerSecond = state.speed * 8;
-  const dt = 1 / pxPerSecond;
-  const gainPx = state.gain * 12;
+  const gainPx = state.gain * 8.5;
+
   ctx.save();
   ctx.beginPath();
-  ctx.lineWidth = 2.2;
-  ctx.strokeStyle = '#62f0b3';
-  ctx.shadowColor = '#62f0b3';
-  ctx.shadowBlur = 10;
+  ctx.lineWidth = 2.1;
+  ctx.strokeStyle = '#2fb88b';
+  ctx.shadowColor = 'rgba(47, 184, 139, 0.35)';
+  ctx.shadowBlur = 8;
 
   for (let x = 0; x <= width; x += 1) {
     const ageSec = (width - x) / pxPerSecond;
     const sampleTime = state.phase - ageSec;
     const value = sampleRhythm(sampleTime);
-    const y = baselineY - value * gainPx;
-    if (x === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
+    const y = clamp(baselineY - value * gainPx, 12, height - 12);
+    if (x === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
   }
+
   ctx.stroke();
   ctx.restore();
 
   ctx.save();
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.strokeStyle = 'rgba(85, 120, 145, 0.16)';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(0, baselineY);
@@ -341,10 +348,13 @@ function render(now) {
   const height = rect.height;
   const delta = Math.min(0.05, (now - state.lastTime) / 1000);
   state.lastTime = now;
-  if (!state.paused) state.phase += delta;
+
+  if (!state.paused) {
+    state.phase += delta;
+  }
 
   ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = '#050a0d';
+  ctx.fillStyle = '#eef5f7';
   ctx.fillRect(0, 0, width, height);
   drawGrid(width, height);
   drawTrace(width, height);
@@ -364,9 +374,15 @@ gainRange.addEventListener('input', (e) => {
   state.gain = Number(e.target.value);
   gainValue.textContent = String(state.gain);
 });
-noiseRange.addEventListener('input', (e) => { state.noise = Number(e.target.value); });
-baselineToggle.addEventListener('change', (e) => { state.baselineWander = e.target.checked; });
-gridToggle.addEventListener('change', (e) => { state.showGrid = e.target.checked; });
+noiseRange.addEventListener('input', (e) => {
+  state.noise = Number(e.target.value);
+});
+baselineToggle.addEventListener('change', (e) => {
+  state.baselineWander = e.target.checked;
+});
+gridToggle.addEventListener('change', (e) => {
+  state.showGrid = e.target.checked;
+});
 pauseBtn.addEventListener('click', () => {
   state.paused = !state.paused;
   pauseBtn.textContent = state.paused ? 'Reanudar' : 'Pausar';
