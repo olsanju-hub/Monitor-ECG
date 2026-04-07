@@ -10,9 +10,10 @@
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div>
+      <div class="topbar-main">
         <p class="eyebrow">Simulador educativo</p>
         <h1>Monitor ECG</h1>
+        <p class="topbar-subtitle">Interfaz clara con estética de monitor clínico y traza sintética en tiempo real.</p>
       </div>
       <div class="topbar-badges">
         <span class="badge">HTML</span>
@@ -25,7 +26,7 @@
       <section class="panel panel-monitor">
         <div class="monitor-header">
           <div class="monitor-stats">
-            <div class="stat">
+            <div class="stat stat-primary">
               <span class="stat-label">Patrón</span>
               <strong id="currentRhythmLabel">Ritmo sinusal</strong>
             </div>
@@ -45,11 +46,23 @@
           <button id="pauseBtn" class="ghost-btn" type="button" aria-pressed="false">Pausar</button>
         </div>
 
-        <div class="monitor-frame">
-          <canvas id="ecgCanvas" width="1400" height="520" aria-label="Monitor de ECG"></canvas>
-          <div class="monitor-overlay">
-            <span class="led"></span>
-            <span>Monitor activo</span>
+        <div class="monitor-device">
+          <div class="monitor-toolbar">
+            <div class="toolbar-group">
+              <span class="toolbar-pill toolbar-pill-live"><span class="led"></span> Activo</span>
+              <span class="toolbar-pill">DI simulada</span>
+            </div>
+            <div class="toolbar-group">
+              <span class="toolbar-pill">25 mm/s</span>
+              <span class="toolbar-pill">10 mm/mV</span>
+            </div>
+          </div>
+
+          <div class="monitor-frame">
+            <canvas id="ecgCanvas" width="1400" height="520" aria-label="Monitor de ECG"></canvas>
+            <div class="monitor-overlay">
+              <span>Monitor activo</span>
+            </div>
           </div>
         </div>
 
@@ -60,6 +73,11 @@
       </section>
 
       <aside class="panel panel-controls">
+        <div class="controls-header">
+          <h2>Ajustes</h2>
+          <span class="controls-note">Un monitor de una derivación con fines docentes</span>
+        </div>
+
         <div class="controls-block">
           <label for="rhythmSelect">Ritmo / patrón ECG</label>
           <select id="rhythmSelect"></select>
@@ -87,15 +105,17 @@
           </div>
         </div>
 
-        <div class="switches">
-          <label class="switch-row">
-            <input id="baselineToggle" type="checkbox" checked />
-            <span>Deriva de línea de base</span>
-          </label>
-          <label class="switch-row">
-            <input id="gridToggle" type="checkbox" checked />
-            <span>Mostrar retícula</span>
-          </label>
+        <div class="switches-card">
+          <div class="switches">
+            <label class="switch-row">
+              <input id="baselineToggle" type="checkbox" checked />
+              <span>Deriva de línea de base</span>
+            </label>
+            <label class="switch-row">
+              <input id="gridToggle" type="checkbox" checked />
+              <span>Mostrar retícula</span>
+            </label>
+          </div>
         </div>
 
         <div class="controls-block">
