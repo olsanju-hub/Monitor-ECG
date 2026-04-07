@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitor ECG</title>
+  <meta name="description" content="Simulador educativo de ECG en HTML, CSS y JavaScript puro." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Simulador educativo</p>
+        <h1>Monitor ECG</h1>
+      </div>
+      <div class="topbar-badges">
+        <span class="badge">HTML</span>
+        <span class="badge">CSS</span>
+        <span class="badge">JS</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel panel-monitor">
+        <div class="monitor-header">
+          <div class="monitor-stats">
+            <div class="stat">
+              <span class="stat-label">Patrón</span>
+              <strong id="currentRhythmLabel">Ritmo sinusal</strong>
+            </div>
+            <div class="stat">
+              <span class="stat-label">FC</span>
+              <strong><span id="heartRateValue">75</span> lpm</strong>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Ganancia</span>
+              <strong><span id="gainValue">10</span> mm/mV</strong>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Velocidad</span>
+              <strong><span id="speedValue">25</span> mm/s</strong>
+            </div>
+          </div>
+          <button id="pauseBtn" class="ghost-btn" type="button" aria-pressed="false">Pausar</button>
+        </div>
+
+        <div class="monitor-frame">
+          <canvas id="ecgCanvas" width="1400" height="520" aria-label="Monitor de ECG"></canvas>
+          <div class="monitor-overlay">
+            <span class="led"></span>
+            <span>Monitor activo</span>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span><i class="legend-line"></i> Traza sintética</span>
+          <span>Uso exclusivamente docente</span>
+        </div>
+      </section>
+
+      <aside class="panel panel-controls">
+        <div class="controls-block">
+          <label for="rhythmSelect">Ritmo / patrón ECG</label>
+          <select id="rhythmSelect"></select>
+        </div>
+
+        <div class="controls-grid">
+          <div class="controls-block">
+            <label for="heartRateRange">Frecuencia cardiaca</label>
+            <input id="heartRateRange" type="range" min="20" max="220" step="1" value="75" />
+          </div>
+
+          <div class="controls-block">
+            <label for="speedRange">Velocidad del papel</label>
+            <input id="speedRange" type="range" min="12.5" max="50" step="12.5" value="25" />
+          </div>
+
+          <div class="controls-block">
+            <label for="gainRange">Ganancia</label>
+            <input id="gainRange" type="range" min="5" max="20" step="5" value="10" />
+          </div>
+
+          <div class="controls-block">
+            <label for="noiseRange">Ruido</label>
+            <input id="noiseRange" type="range" min="0" max="0.1" step="0.005" value="0.01" />
+          </div>
+        </div>
+
+        <div class="switches">
+          <label class="switch-row">
+            <input id="baselineToggle" type="checkbox" checked />
+            <span>Deriva de línea de base</span>
+          </label>
+          <label class="switch-row">
+            <input id="gridToggle" type="checkbox" checked />
+            <span>Mostrar retícula</span>
+          </label>
+        </div>
+
+        <div class="controls-block">
+          <label for="infoText">Descripción docente</label>
+          <article id="infoText" class="info-box"></article>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
