@@ -81,8 +81,9 @@ function conduction(){
  controls+info+summary();
 }
 function vectorState(){
- const angle=state.mode==="practice"?[-20,45,0,-150,120,30][state.index%6]:state.angle;
- const lead=state.mode==="practice"?["I","I","aVF","aVR","III","aVL"][state.index%6]:state.lead;
+ const cases=[[0,"I"],[180,"I"],[0,"aVF"],[-150,"aVR"],[0,"aVR"],[120,"III"]];
+ const angle=state.mode==="practice"?cases[state.index%6][0]:state.angle;
+ const lead=state.mode==="practice"?cases[state.index%6][1]:state.lead;
  return {angle,lead,value:C.projection(angle,lead),sign:C.polarity(angle,lead)};
 }
 function vectors(){
@@ -106,7 +107,7 @@ function vectors(){
 }
 function placement(){
  const name=C.PLACEMENT_ORDER[state.index%6],p=C.ELECTRODES[name],explore=state.mode==="explore";
- const torso='<svg data-lab-torso="true" class="lab-figure lab-torso" viewBox="0 0 700 470" role="img" aria-label="Tórax anterior orientado como si se mirara al paciente; espacios intercostales y líneas de referencia"><defs><linearGradient id="lab-skin" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f8e0d1"/><stop offset="1" stop-color="#efbbab"/></linearGradient></defs>'+
+ const torso='<svg data-lab-torso="true" class="lab-figure lab-torso" viewBox="0 0 700 470" role="group" aria-label="Tórax anterior orientado como si se mirara al paciente; espacios intercostales y líneas de referencia"><defs><linearGradient id="lab-skin" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f8e0d1"/><stop offset="1" stop-color="#efbbab"/></linearGradient></defs>'+
  '<path d="M251 46Q209 79 144 107L103 436L599 436L558 107Q487 80 447 46L414 66Q395 93 354 98Q310 94 288 65Z" fill="url(#lab-skin)" stroke="#b6847b" stroke-width="4"/>'+
  '<path d="M350 97V390" stroke="#ad7974" stroke-width="4"/>'+
  '<path d="M278 87Q319 110 350 123Q387 107 424 87" fill="none" stroke="#c69888" stroke-width="5"/>'+
