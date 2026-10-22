@@ -18,10 +18,21 @@ function vectorPicture(angle){
  '<text x="'+cx+'" y="303" text-anchor="middle" font-size="15" fill="#0a3d62" font-weight="700">Eje aproximado: '+Math.round(angle)+'°</text></svg>';
 }
 function qrsTrace(value,label){
- const y=51-36*Math.max(-1,Math.min(1,value/8));
- return '<svg viewBox="0 0 150 104" role="img" aria-label="QRS esquemático de '+label+', voltaje neto '+value.toFixed(1)+' milímetros">'+
- '<path d="M0 51H150" stroke="#c8d6d7" stroke-width="1.5"/>'+
- '<path d="M7 51H46L52 54L63 '+y.toFixed(2)+'L74 51H143" stroke="#0a5970" stroke-width="3.2" fill="none" stroke-linejoin="round"/>'+
+ // Visualizes the SIGN of net QRS voltage, not a full 12-lead morphologic diagnosis.
+ const clamped=Math.max(-8,Math.min(8,value));
+ const magnitude=Math.abs(clamped)/8;
+ const mainY=51+(clamped>=0?-38:38)*magnitude;
+ const neutral=Math.abs(value)<.22;
+ const path=neutral
+ ?'M7 51H37C44 51 48 46 54 44C59 44 62 59 68 59C74 59 78 51 86 51H143'
+ :clamped>=0
+ ?'M7 51H38C44 51 46 56 50 56C55 56 57 48 63 '+mainY.toFixed(2)+'C66 '+mainY.toFixed(2)+' 68 51 72 55C76 59 80 51 86 51H143'
+ :'M7 51H38C44 51 47 43 51 43C57 43 59 55 64 '+mainY.toFixed(2)+'C67 '+mainY.toFixed(2)+' 69 51 75 50C81 49 82 51 88 51H143';
+ return '<svg viewBox="0 0 150 104" role="img" aria-label="QRS orientativo de '+label+', voltaje neto '+value.toFixed(1)+' milímetros">'+
+ '<defs><pattern id="axis-strips-grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0H0V10" fill="none" stroke="#e6d7da" stroke-width=".6"/></pattern></defs>'+
+ '<rect width="150" height="104" rx="10" fill="#fffbfa"/><rect width="150" height="104" rx="10" fill="url(#axis-strips-grid)"/>'+
+ '<path d="M0 51H150" stroke="#c3d4d7" stroke-width="1.5"/>'+
+ '<path d="'+path+'" stroke="#0a536d" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>'+
  '<text x="7" y="17" font-size="15" font-weight="800" fill="#0a3d62">'+label+'</text></svg>';
 }
 function caseScreen(){
