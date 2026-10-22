@@ -106,3 +106,59 @@
 .lab-wave-preview .subtle{font-size:.76rem;margin:5px 0 0}
 .lab-correlation{border-radius:12px;padding:12px 15px;color:#17475e;background:#deefee;border-left:4px solid var(--teal);font-size:.88rem;font-weight:550;margin:10px 0}
 .lab-correlation strong{color:var(--navy)}
+
+
+/* Responsive containment — prevent SVG intrinsic dimensions from widening an iPhone page.
+ * Figures fit the viewport first. Only the user's explicit zoom request enables
+ * an independently scrollable enlarged SVG. */
+html,body{width:100%;max-width:100%;overflow-x:clip}
+.app-layout,.main-content,#screen,#monitorView,
+.lesson-layout,.lesson-main,.lesson-aside,.diagram-card,.lab-root{
+ min-width:0;max-width:100%;
+}
+.lesson-main{grid-template-columns:minmax(0,1fr)}
+.lesson-layout>*,
+.lesson-main>*,.diagram-card>*,.lab-root>*{min-width:0}
+.lab-diagram-viewport{width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden}
+.lab-figure-container .lab-heart,
+.lab-figure-container .lab-vector,
+.lab-figure-container .lab-torso{
+ display:block;width:100%;max-width:100%;min-width:0;max-height:none;height:auto;
+}
+.lab-figure-container[data-lab-zoomed="true"] .lab-heart{width:720px;max-width:none;min-width:720px}
+.lab-figure-container[data-lab-zoomed="true"] .lab-vector{width:690px;max-width:none;min-width:690px}
+.lab-figure-container[data-lab-zoomed="true"] .lab-torso{width:700px;max-width:none;min-width:700px}
+.lab-view-tools{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:12px 0 8px}
+.lab-view-tools span{font-size:.8rem;color:var(--muted);max-width:48ch}
+.lab-view-tools button{flex-shrink:0}
+.lab-figure-container[data-lab-zoomed="true"]{scroll-behavior:auto}
+.lab-diagram-viewport:not(.lab-measure-viewport)::after{display:none!important}
+@media(max-width:1070px){
+ .lesson-layout{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:780px){
+ .main-content{padding-bottom:calc(125px + env(safe-area-inset-bottom))}
+ .topbar{max-width:100%;min-width:0}
+ .brand{min-width:0}
+ .offline-chip{flex-shrink:0}
+ .nav-bottom{max-width:100vw;overflow:hidden}
+ .lab-view-tools{align-items:stretch}
+ .lab-view-tools span{flex:1 1 155px;align-self:center;line-height:1.35}
+ .lab-view-tools button{margin-left:auto}
+ .lab-diagram-viewport{border-radius:12px}
+ .lab-figure-container .lab-heart,
+ .lab-figure-container .lab-vector,
+ .lab-figure-container .lab-torso{min-width:0;width:100%;max-width:100%}
+ .lab-figure-container[data-lab-zoomed="true"] .lab-heart{width:720px;max-width:none;min-width:720px}
+ .lab-figure-container[data-lab-zoomed="true"] .lab-vector{width:690px;max-width:none;min-width:690px}
+ .lab-figure-container[data-lab-zoomed="true"] .lab-torso{width:700px;max-width:none;min-width:700px}
+}
+@media(max-width:430px){
+ .main-content{padding-left:12px;padding-right:12px}
+ .diagram-card.surface{padding:14px}
+ .lab-top{gap:10px}
+ .lab-key-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .lab-key{overflow-wrap:anywhere}
+ .lab-view-tools button{min-width:145px}
+ .lab-correlation,.lab-description,.lab-feedback{padding:12px}
+}
