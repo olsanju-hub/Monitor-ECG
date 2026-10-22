@@ -130,7 +130,11 @@ function generate(preset,opts={}){
   const atrialRR=60/(preset.base.flutterRate||300);
   for(let t=start;t<until;t+=atrialRR)strip.flutterWaves.push(t);
   for(let t=start+.27;t<until;t+=rr)pushBeat(strip,t,{...deepMerge(base),pAmp:0},false);
- } else if(strip.kind==="sequence"){
+ } else if(key==="sinusPause"){
+  const rrs=[rr,rr,rr,1.72*rr,rr,rr,rr,rr];
+  let t=start+.22,k=0;
+  while(t<until){pushBeat(strip,t,base);t+=rrs[k++%rrs.length]}
+ }else if(strip.kind==="sequence"){
   const seq=preset.sequence||["normal"];
   let k=0;
   for(let t=start+.22;t<until;t+=rr,k++){
@@ -144,11 +148,6 @@ function generate(preset,opts={}){
     pushBeat(strip,ectopicOnset,x,type==="pac"?Math.max(.08,x.pr||.12):false);
    }else pushBeat(strip,t,preset.normalBeat||base);
   }
- } else if(key==="sinusPause"){
-  // Non-multiple-of-PP pause, unlike exact SA block.
-  const rrs=[rr,rr,rr,1.72*rr,rr,rr,rr,rr];
-  let t=start+.22,k=0;
-  while(t<until){pushBeat(strip,t,base);t+=rrs[k++%rrs.length]}
  }else{
   const ignoreP=key==="svt"||key==="vt"||key==="ventEscape"||key==="aivr"||key==="paced";
   const retro=key==="svt";
