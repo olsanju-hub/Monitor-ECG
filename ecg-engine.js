@@ -18,10 +18,21 @@ function normalBump(t,onset,duration,height){
 }
 function gaussian(t,centre,sigma,height){const z=(t-centre)/sigma;return height*Math.exp(-.5*z*z);}
 function linear(pts,x){
+ // Hermite interpolación local, con pendientes nulas en extremos;
+ // evita vértices de polilínea sin desplazar el inicio/fin medidos del QRS.
  if(x<=pts[0][0]||x>=pts[pts.length-1][0])return 0;
+ function slope(i){
+  if(i===0||i===pts.length-1)return 0;
+  const a=(pts[i][1]-pts[i-1][1])/(pts[i][0]-pts[i-1][0]);
+  const b=(pts[i+1][1]-pts[i][1])/(pts[i+1][0]-pts[i][0]);
+  return a*b<=0?0:(a+b)/2;
+ }
  for(let k=1;k<pts.length;k++){
   const [x2,y2]=pts[k],[x1,y1]=pts[k-1];
-  if(x<=x2){const u=bound((x-x1)/(x2-x1),0,1);return y1+(y2-y1)*u;}
+  if(x<=x2){
+   const h=x2-x1,u=bound((x-x1)/h,0,1),u2=u*u,u3=u2*u;
+   return (2*u3-3*u2+1)*y1+(u3-2*u2+u)*h*slope(k-1)+(-2*u3+3*u2)*y2+(u3-u2)*h*slope(k);
+  }
  }
  return 0;
 }
