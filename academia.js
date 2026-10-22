@@ -44,7 +44,7 @@ function render(){
  if(page==="quiz")content.innerHTML=quizScreen();
  if(page==="monitor"){if(typeof resizeCanvas==="function")resizeCanvas();}
  document.querySelectorAll("[data-progress]").forEach(el=>{el.style.width=el.dataset.progress+"%"});
- window.scrollTo({top:0,behavior:"auto"});
+ window.scrollTo({top:0,left:0,behavior:"auto"});
  save();
 }
 function home(){
