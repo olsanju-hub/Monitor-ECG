@@ -137,9 +137,9 @@ function draw(now){
   }
  }
  if(state.phase>=870)state.phase=12;
-requestAnimationFrame(draw);
+window.requestAnimationFrame(draw);
 }
 function resizeCanvas(){const r=canvas.getBoundingClientRect();if(r.width>0&&r.height>0){canvas.width=Math.round(r.width*(devicePixelRatio||1));canvas.height=Math.round(r.height*(devicePixelRatio||1))}}
 window.resizeCanvas=resizeCanvas;
-requestAnimationFrame(draw);
+window.requestAnimationFrame(draw);
 })();
