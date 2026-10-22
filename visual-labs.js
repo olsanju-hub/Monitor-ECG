@@ -78,7 +78,21 @@ function conduction(){
  '<text x="112" y="110" font-size="17" fill="#365060">Aurícula derecha</text><text x="506" y="115" font-size="16" fill="#365060">Aurícula izquierda</text><text x="60" y="339" font-size="16" fill="#365060">Ventrículo derecho</text><text x="499" y="345" font-size="16" fill="#365060">Ventrículo izquierdo</text>'+
  '</svg></div>'+
  (state.mode==="explore"?'<div class="lab-key-grid">'+C.CONDUCTION.map((p,i)=>'<button type="button" data-lab-part="'+p.id+'" class="lab-key '+(state.part===p.id?'selected':'')+'">'+(i+1)+'. '+esc(p.short)+'</button>').join("")+'</div>':"")+
- controls+info+summary();
+ controls+(state.mode==='explore'?'<p class="lab-correlation"><strong>Correlato ECG:</strong> '+esc(conductionPhase(state.stage))+'</p>':'')+info+summary();
+}
+function vectorTrace(value){
+ const pts=[];for(let x=0;x<=500;x+=4){
+  const u=(x-250)/27;
+  const peak=Math.exp(-.5*u*u);
+  const shoulder=.13*Math.exp(-.5*Math.pow((x-335)/45,2));
+  const y=70-53*value*peak-15*value*shoulder;
+  pts.push((x?"L":"M")+x+","+y.toFixed(2));
+ }
+ return pts.join(" ");
+}
+function conductionPhase(stage){
+ const phases=["P · inicio de activación auricular","P · propagación auricular","PR · retraso nodal AV","QRS · activación septal","QRS · activación ventricular","QRS · red de Purkinje"];
+ return phases[stage]||phases[0];
 }
 function vectorState(){
  const cases=[[0,"I"],[180,"I"],[0,"aVF"],[-150,"aVR"],[0,"aVR"],[120,"III"]];
@@ -100,6 +114,7 @@ function vectors(){
  '<path data-lab-vector-arrow d="M'+cx+' '+cy+' L'+x+' '+y+'" stroke="#087c8d" stroke-width="10" stroke-linecap="round"/>'+
  '<circle data-lab-vector-dot cx="'+x+'" cy="'+y+'" r="14" fill="#087c8d" stroke="#fff" stroke-width="4"/>'+
  '<text x="320" y="416" fill="#274557" text-anchor="middle" font-size="18">Vector: '+v.angle+'° · Derivación: '+v.lead+'</text></svg></div>'+
+ (state.mode==="explore"||state.last?'<div class="lab-wave-preview"><p class="eyebrow">DEFLEXIÓN RESULTANTE · MODELO VECTORIAL</p><svg viewBox="0 0 500 140" role="img" aria-label="Deflexión orientativa calculada según proyección eléctrica"><path d="M0 70H500" stroke="#cadadd" stroke-width="1.5"/><path data-lab-projection-wave d="'+vectorTrace(v.value)+'" fill="none" stroke="#087c8d" stroke-width="4" stroke-linejoin="round"/></svg><p class="subtle">La deflexión cambia de signo cuando el vector cruza el eje perpendicular. Forma sintética esquemática, no QRS clínico.</p></div>':'')+
  (state.mode==="explore"?'<div class="lab-inputs"><label>Derivación<select data-lab-lead aria-label="Derivación del plano frontal">'+Object.keys(C.LEADS).map(k=>'<option value="'+k+'" '+(k===v.lead?'selected':'')+'>'+k+'</option>').join("")+'</select></label><label>Ángulo: <strong data-lab-angle-label>'+v.angle+'°</strong><input type="range" min="-180" max="180" step="5" value="'+v.angle+'" data-lab-angle aria-label="Ángulo del vector"/></label></div>'+
  '<div class="lab-description"><strong data-lab-projection>'+deflection+'</strong><p data-lab-polarity>Deflexión '+(v.sign==="positive"?"positiva":v.sign==="negative"?"negativa":"equipásica")+'. El vector cambia su signo cuando cruza la dirección perpendicular al eje observado.</p></div>':
  '<div class="lab-options" role="group" aria-label="Predecir polaridad">'+[["positive","Positiva"],["negative","Negativa"],["isoelectric","Equipásica"]].map(([k,label])=>'<button type="button" class="lab-answer" data-lab-polarity-choice="'+k+'" '+(state.last?'disabled':'')+'>'+label+'</button>').join("")+'</div>'+
@@ -182,6 +197,7 @@ function updateVector(){
  const label=$("#ecg-lab [data-lab-angle-label]");if(label)label.textContent=v.angle+"°";
  const sign=$("#ecg-lab [data-lab-polarity]");if(sign)sign.textContent="Deflexión "+(v.sign==="positive"?"positiva":v.sign==="negative"?"negativa":"equipásica")+". El signo depende de la proyección.";
  const val=$("#ecg-lab [data-lab-projection]");if(val)val.textContent=Math.round(v.value*100)+" % de la amplitud máxima";
+ const trace=$("#ecg-lab [data-lab-projection-wave]");if(trace)trace.setAttribute("d",vectorTrace(v.value));
  const input=$("#ecg-lab [data-lab-angle]");if(input)input.value=v.angle;
  const text=svg.querySelector("text:last-of-type");if(text)text.textContent="Vector: "+v.angle+"° · Derivación: "+v.lead;
 }
