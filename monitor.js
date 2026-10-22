@@ -96,9 +96,55 @@ function signal(t){
  }
  return val+.005*Math.sin(2*Math.PI*t*.32)+.002*Math.sin(2*Math.PI*t*43);
 }
+const monitorQuizState={solved:new Set(),current:null,choices:[]};
+function startMonitorChallenge(){
+ const candidates=["sinus","sinusBrady","sinusTach","af","flutter","svt","wenckebach","mobitz2","completeBlock","rbbb","lbbb","wpw","vt","pvcs","hypoK","hyperK"];
+ const available=candidates.filter(key=>presets[key]);
+ const pool=available.filter(key=>!monitorQuizState.solved.has(key));
+ const key=(pool.length?pool:available)[Math.floor(Math.random()*(pool.length?pool.length:available.length))];
+ if(!key)return;
+ setRhythm(key);
+ monitorQuizState.current=key;
+ const distractors=available.filter(x=>x!==key).sort(()=>Math.random()-.5).slice(0,3);
+ monitorQuizState.choices=[key,...distractors].sort(()=>Math.random()-.5);
+ select.disabled=true;select.style.visibility="hidden";
+ label.textContent="¿Qué ritmo estás observando?";
+ info.innerHTML="<p>Observa frecuencia, regularidad, morfología QRS y ondas auriculares antes de responder. El patrón es un esquema docente simplificado.</p>";
+ const panel=document.getElementById("monitorChallengePanel");
+ panel.hidden=false;
+ panel.innerHTML='<p class="eyebrow">RETO DE IDENTIFICACIÓN · ECG ESQUEMÁTICO</p><p>Elige el diagnóstico que mejor corresponde al trazado.</p><div class="challenge-answers">'+monitorQuizState.choices.map(x=>'<button type="button" data-monitor-answer="'+x+'">'+presets[x].label+'</button>').join("")+'</div><p class="subtle">'+monitorQuizState.solved.size+' patrones diferentes identificados correctamente en esta sesión.</p>';
+}
+function answerMonitorChallenge(chosen){
+ const right=monitorQuizState.current;
+ if(!right)return;
+ const ok=chosen===right;
+ if(ok)monitorQuizState.solved.add(right);
+ const r=presets[right];
+ const panel=document.getElementById("monitorChallengePanel");
+ panel.innerHTML='<p class="'+(ok?"correct-answer":"wrong-answer")+'">'+(ok?"Identificación correcta.":"No es el patrón seleccionado.")+'</p><p><strong>Diagnóstico docente: '+r.label+'</strong></p><p>'+r.description.intro+'</p><p>'+monitorQuizState.solved.size+' patrones distintos identificados correctamente.</p><button type="button" class="btn primary" id="monitorAnother">Otro trazado →</button>';
+ if(ok&&monitorQuizState.solved.size>=5&&window.ECG_markPractice)window.ECG_markPractice(8);
+ if(ok&&monitorQuizState.solved.size>=7&&window.ECG_markPractice)window.ECG_markPractice(9);
+ select.disabled=false;select.style.visibility="";
+ info.innerHTML="<h2>"+r.label+"</h2><p>"+r.description.intro+"</p><ul>"+(r.description.bullets||[]).map(x=>"<li>"+x+"</li>").join("")+"</ul>";
+ monitorQuizState.current=null;
+ document.getElementById("monitorAnother")?.addEventListener("click",startMonitorChallenge);
+}
+
 const toolbar=document.createElement("div");toolbar.className="monitor-tools";
 toolbar.innerHTML='<button type="button" id="monitorPlay">Pausar</button><label for="monitorSpeed">Velocidad <strong id="monitorSpeedLabel">1×</strong></label><input type="range" id="monitorSpeed" min=".5" max="2" step=".5" value="1" aria-label="Velocidad de reproducción"/><button type="button" id="monitorRestart">Reiniciar trazo</button>';
 document.querySelector(".monitor-chooser")?.after(toolbar);
+const challengeTrigger=document.createElement("button");
+challengeTrigger.type="button";challengeTrigger.textContent="Identificar un ritmo";
+challengeTrigger.addEventListener("click",startMonitorChallenge);
+toolbar.append(challengeTrigger);
+const monitorChallengePanel=document.createElement("div");
+monitorChallengePanel.id="monitorChallengePanel";monitorChallengePanel.className="monitor-challenge";monitorChallengePanel.hidden=true;
+toolbar.after(monitorChallengePanel);
+monitorChallengePanel.addEventListener("click",event=>{
+ const btn=event.target.closest("[data-monitor-answer]");
+ if(btn)answerMonitorChallenge(btn.dataset.monitorAnswer);
+});
+
 document.getElementById("monitorPlay")?.addEventListener("click",e=>{state.paused=!state.paused;e.target.textContent=state.paused?"Reproducir":"Pausar"});
 document.getElementById("monitorRestart")?.addEventListener("click",()=>state.phase=0);
 document.getElementById("monitorSpeed")?.addEventListener("input",e=>{state.speed=Number(e.target.value);document.getElementById("monitorSpeedLabel").textContent=state.speed+"×"});
