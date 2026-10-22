@@ -14,7 +14,7 @@ let playback=null,dragging=false,dragPointer=null;
 const $=sel=>document.querySelector(sel);
 function stop(){if(playback){clearInterval(playback);playback=null;}state.playing=false;dragging=false}
 function reset(type,mode="explore"){
- stop();state.type=type;state.mode=mode;state.index=0;state.part="sa";state.stage=0;state.point=null;state.marks=[];state.last=null;state.correct=new Set();
+ stop();state.type=type;state.mode=mode;state.index=0;state.part=type==="placement"?"V1":"sa";state.stage=0;state.point=null;state.marks=[];state.last=null;state.correct=new Set();
 }
 function prepare(type,mode="practice"){if(!count[type])return;reset(type,mode);}
 function render(chapter){
@@ -49,9 +49,11 @@ function content(){
 }
 function refresh({keepScroll=false}={}){
  const rootEl=$("#ecg-lab");if(!rootEl)return;
- const before=keepScroll?rootEl.querySelector(".lab-diagram-viewport")?.scrollLeft:undefined;
+ const oldScroll=keepScroll?rootEl.querySelector(".lab-diagram-viewport")?.scrollLeft:undefined;
+ const oldZoom=keepScroll?rootEl.querySelector("[data-lab-zoom]")?.value:null;
  rootEl.innerHTML=content();
- if(keepScroll&&before!=null){const sc=rootEl.querySelector(".lab-diagram-viewport");if(sc)sc.scrollLeft=before;}
+ if(keepScroll&&oldScroll!=null){const sc=rootEl.querySelector(".lab-diagram-viewport");if(sc)sc.scrollLeft=oldScroll;}
+ if(oldZoom){const sel=rootEl.querySelector("[data-lab-zoom]"),sheet=rootEl.querySelector(".lab-measure-sheet");if(sel)sel.value=oldZoom;if(sheet)sheet.style.width=Math.round(1000*Number(oldZoom))+"px";}
 }
 function conduction(){
  const target=C.CONDUCTION[state.index%C.CONDUCTION.length],selected=C.CONDUCTION.find(p=>p.id===state.part)||C.CONDUCTION[0];
@@ -184,7 +186,27 @@ function updateVector(){
 }
 document.body.addEventListener("click",event=>{
  const t=event.target.closest("[data-lab-mode],[data-lab-part],[data-lab-stage],[data-lab-action],[data-lab-electrode],[data-lab-polarity-choice]");
- if(!t||!$("#ecg-lab"))return;
+ if(!$("#ecg-lab"))return;
+ const plot=event.target.closest("[data-lab-torso],[data-lab-paper]");
+ if(plot&&state.mode==="practice"&&!state.last){
+  const point=C.svgClientPoint(plot,event.clientX,event.clientY);
+  if(plot.hasAttribute("data-lab-torso")&&state.type==="placement"){
+   const id=C.PLACEMENT_ORDER[state.index%C.PLACEMENT_ORDER.length];
+   const graded=C.gradePlacement(id,point.x,point.y);
+   state.point=point;record(id,graded.ok,graded.reason);refresh({keepScroll:true});return;
+  }
+  if(plot.hasAttribute("data-lab-paper")&&state.type==="measurement"){
+   if(point.x<0||point.x>1100)return;
+   state.marks.push(point.x/220);
+   if(state.marks.length>=2){
+    const id=C.MEASURE_TASKS[state.index%C.MEASURE_TASKS.length].id;
+    const result=C.measurementGrade(id,state.marks[0],state.marks[1]);
+    record(id,result.ok,result.reason);
+   }
+   refresh({keepScroll:true});return;
+  }
+ }
+ if(!t)return;
  if(t.hasAttribute("data-lab-mode")){reset(state.type,t.dataset.labMode);refresh();return}
  if(t.hasAttribute("data-lab-stage")){stop();state.stage=Number(t.dataset.labStage);refresh({keepScroll:true});return}
  if(t.hasAttribute("data-lab-action")){action(t.dataset.labAction);return}
@@ -203,24 +225,7 @@ document.body.addEventListener("click",event=>{
   record("vector-"+state.index,ok,ok?"Proyección cos("+a.angle+"° − "+C.LEADS[a.lead]+"°) = "+a.value.toFixed(2)+". Resultado: "+(a.sign==="positive"?"positivo":a.sign==="negative"?"negativo":"casi equipásico")+".":"Analiza el ángulo entre vector y polo positivo: cos("+a.angle+"° − "+C.LEADS[a.lead]+"°) = "+a.value.toFixed(2)+".");
   refresh({keepScroll:true});return;
  }
- const plot=event.target.closest("[data-lab-torso],[data-lab-paper]");
- if(!plot||state.mode!=="practice"||state.last)return;
- const point=C.svgClientPoint(plot,event.clientX,event.clientY);
- if(plot.hasAttribute("data-lab-torso")&&state.type==="placement"){
-  const id=C.PLACEMENT_ORDER[state.index%C.PLACEMENT_ORDER.length];
-  const graded=C.gradePlacement(id,point.x,point.y);
-  state.point=point;record(id,graded.ok,graded.reason);refresh({keepScroll:true});return;
- }
- if(plot.hasAttribute("data-lab-paper")&&state.type==="measurement"){
-  if(point.x<0||point.x>1100)return;
-  state.marks.push(point.x/220);
-  if(state.marks.length>=2){
-   const id=C.MEASURE_TASKS[state.index%C.MEASURE_TASKS.length].id;
-   const result=C.measurementGrade(id,state.marks[0],state.marks[1]);
-   record(id,result.ok,result.reason);
-  }
-  refresh({keepScroll:true});
- }
+
 });
 document.body.addEventListener("keydown",event=>{
  if((event.key==="Enter"||event.key===" ")&&event.target.matches("[data-lab-part],[data-lab-electrode]")){
