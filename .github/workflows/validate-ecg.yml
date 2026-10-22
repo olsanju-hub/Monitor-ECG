@@ -7,6 +7,9 @@ on:
       - "rhythms.js"
       - "rhythms-advanced.js"
       - "monitor.js"
+      - "visual-labs.js"
+      - "visual-labs-core.js"
+      - "academia.js"
       - "tests/**"
       - ".github/workflows/validate-ecg.yml"
   pull_request:
@@ -15,6 +18,9 @@ on:
       - "rhythms.js"
       - "rhythms-advanced.js"
       - "monitor.js"
+      - "visual-labs.js"
+      - "visual-labs-core.js"
+      - "academia.js"
       - "tests/**"
   workflow_dispatch:
 permissions:
@@ -26,4 +32,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Motor y secuencias de ritmo
-        run: node --test tests/ecg-engine.test.cjs
+        run: node --test tests/ecg-engine.test.cjs tests/visual-labs.test.cjs
