@@ -1,0 +1,20 @@
+{
+  "name": "ECG · Aprende electrocardiografía en un día",
+  "short_name": "ECG",
+  "description": "Academia interactiva de electrocardiografía y monitor docente. Estudio, práctica acumulativa y progreso local.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "lang": "es",
+  "background_color": "#F7F8F7",
+  "theme_color": "#0A3D62",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
