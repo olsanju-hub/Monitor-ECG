@@ -27,7 +27,7 @@ function linear(pts,x){
 }
 function qrsAt(t,b){
  const dur=bound(b.qrsWidth||.09,.06,.22),u=t/dur;
- if(u<0||u>1)return 0;
+ if(u<0||u>1)return b.spikeAmp?gaussian(t,-.016,.0016,b.spikeAmp):0;
  let q=b.qAmp??-.06,r=b.rAmp??1,s=b.sAmp??-.22;
  const hasRp=Boolean(b.rPrimeAmp);
  const pts=hasRp
