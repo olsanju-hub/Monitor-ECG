@@ -7,94 +7,20 @@
 const canvas=document.getElementById("ecgCanvas"),ctx=canvas.getContext("2d");
 const select=document.getElementById("rhythmSelect"),label=document.getElementById("currentRhythmLabel");
 const info=document.getElementById("infoText"),leadBadge=document.getElementById("leadBadge");
-const presets=window.RHYTHMS||{},state={key:"sinus",phase:0,lastTime:0,paused:false,speed:1};
-const range=(v,a,b)=>Math.min(b,Math.max(a,v));
-const gauss=(t,c,s,a)=>a*Math.exp(-.5*((t-c)/s)**2);
-const timeMod=(t,r)=>((t%r)+r)%r;
-function wave(t,t0,b,onlyP=false,hideP=false){
- if(!b)return 0;
- const qrsDur=b.qrsWidth||.09,pDur=b.pWidth||.08,pr=b.pr??.16;
- const pStart=t0+.014, qStart=pStart+pr, qEnd=qStart+qrsDur;
- let v=0;
- if(!hideP&&b.pAmp)v+=gauss(t,pStart+pDur*.48,pDur/3,b.pAmp);
- if(onlyP)return v;
- if(b.spikeAmp)v+=gauss(t,qStart-.027,.003,b.spikeAmp);
- if(b.deltaAmp)v+=gauss(t,qStart+.023,.024,b.deltaAmp);
- if(b.qAmp)v+=gauss(t,qStart+qrsDur*.14,(b.qWidth||.013),b.qAmp);
- if(b.rAmp)v+=gauss(t,qStart+qrsDur*.43,(b.rWidth||Math.max(.008,qrsDur*.105)),b.rAmp);
- if(b.rPrimeAmp)v+=gauss(t,qStart+qrsDur*.80,(b.rPrimeWidth||.012),b.rPrimeAmp);
- if(b.sAmp)v+=gauss(t,qStart+qrsDur*.70,(b.sWidth||.012),b.sAmp);
- if(b.stShift){
-  const a=qEnd,bp=qEnd+.16,k=range(Math.min((t-a)/.025,(bp-t)/.035),0,1);
-  v+=b.stShift*k;
- }
- if(b.tAmp)v+=gauss(t,qEnd+.19,Math.max(.048,(b.tWidth||.16)/2.355),b.tAmp);
- if(b.uAmp)v+=gauss(t,qEnd+.36,.035,b.uAmp);
- return v;
-}
-const BASE={pAmp:.12,pWidth:.08,pr:.16,qAmp:-.08,rAmp:1,sAmp:-.22,qrsWidth:.09,tAmp:.28,tWidth:.17};
-function signal(t){
- const r=presets[state.key];if(!r)return 0;
- if(r.eventMode==="flat")return .002*Math.sin(2*Math.PI*t*2);
- if(r.eventMode==="vf"){
-  return (.36*Math.sin(2*Math.PI*6.3*t+.5*Math.sin(t*5.6))+
-   .27*Math.sin(2*Math.PI*8.4*t+1.8)+.18*Math.sin(2*Math.PI*3.1*t))* (1+.30*Math.sin(t*2.1));
- }
- if(r.eventMode==="torsades"){
-  const rr=60/(r.hr||190);
-  const k=Math.floor(t/rr),phase=timeMod(t,rr)/rr;
-  const envelope=Math.sin(k*.41);
-  return (gauss(phase,.42,.14,1.1*envelope)+gauss(phase,.72,.12,-.7*envelope))*(.75+.35*Math.cos(k*.3));
- }
- let val=0;
- if(r.eventMode==="completeBlock"){
-  const ar=60/r.atrialRate,vr=60/r.ventricularRate;
-  const ai=Math.floor(t/ar),vi=Math.floor(t/vr);
-  for(let k=ai-1;k<=ai+1;k++)val+=gauss(t,k*ar+.15,.026,r.atrialBeat?.pAmp||.11);
-  for(let k=vi-1;k<=vi+1;k++)val+=wave(t,k*vr,{...r.ventricularBeat,pAmp:0,pr:0},false,true);
- }else{
-  let rr=60/Math.max(1,r.hr),beatTimeIndex;
-  if(r.eventMode==="irregular"){
-   // Fixed cyclic RR distribution: keeps R positions stable over time.
-   const rrSeq=[.77,1.18,.66,1.05,.72,1.25,.82,.69,1.13,.88,.62,1.16].map(x=>x*rr);
-   const cycle=rrSeq.reduce((a,b)=>a+b,0),mod=timeMod(t,cycle);
-   let onset=0;
-   const times=[-rrSeq.at(-1),0];
-   for(const interval of rrSeq){onset+=interval;times.push(onset)}
-   times.push(cycle+rrSeq[0]);
-   let position=t-mod;
-   for(let m=-1;m<=1;m++)for(const tick of times)val+=wave(t,position+m*cycle+tick,r.beat,false,true);
-   val+=(Math.sin(2*Math.PI*7.4*t)+.55*Math.sin(2*Math.PI*10.8*t))*.025;
-  }else{
-   beatTimeIndex=Math.floor(t/rr);
-   for(let k=beatTimeIndex-2;k<=beatTimeIndex+2;k++){
-    const t0=k*rr;let b=r.beat||BASE,onlyP=false;
-    if(r.eventMode==="sequence"){
-     const sequence=r.sequence||["normal"];
-     const type=sequence[((k%sequence.length)+sequence.length)%sequence.length];
-     if(type==="pause")continue;
-     if(type==="pvc"){b=r.pvcBeat||BASE;val+=wave(t,t0-rr*(1-(r.pvcOffset||.6)),b,false,true);continue}
-     if(type==="pac"){b=r.pacBeat||BASE;val+=wave(t,t0-rr*(1-(r.pacOffset||.6)),b);continue}
-     b=r.normalBeat||BASE;
-    }
-    if(r.eventMode==="wenckebach"){
-     const cycle=r.cycle||[.16,.22,.28,null],index=((k%cycle.length)+cycle.length)%cycle.length;
-     if(cycle[index]===null){val+=wave(t,t0,{...b,pr:.16},true);continue}
-     b={...b,pr:cycle[index]};
-    }
-    if(r.eventMode==="mobitz2"){
-     const cycle=r.cycle||[true,true,false,true],index=((k%cycle.length)+cycle.length)%cycle.length;
-     if(!cycle[index]){val+=wave(t,t0,b,true);continue}
-    }
-    val+=wave(t,t0,b,false,Boolean(r.base?.flutter));
-   }
-   if(r.base?.flutter){
-    const hz=(r.base.flutterRate||300)/60,part=timeMod(t*hz,1);
-    val+=(part<.26?part/.26:1-(part-.26)/.74)*.16-.08;
-   }
-  }
- }
- return val+.005*Math.sin(2*Math.PI*t*.32)+.002*Math.sin(2*Math.PI*t*43);
+const presets=window.RHYTHMS||{},state={key:"sinus",phase:12,lastTime:0,paused:false,speed:1,strip:null,seed:101,labels:true};
+const engine=window.ECGEngine;
+if(!engine)throw Error("ECGEngine 2.0 is required");
+function signal(t){return engine.sample(state.strip,t);}
+function ecgMetrics(){
+ const s=state.strip;if(!s)return;
+ const info=engine.intervals(s,10),v=presets[state.key];
+ const mask=Boolean(monitorQuizState.current);
+ const metrics=document.getElementById("monitorMetrics");
+ if(!metrics)return;
+ const value=(a,kind)=>a.length?Math.round(a[0]*1000)+" ms":"—";
+ metrics.innerHTML=mask?"<span>Observa FC y regularidad</span><span>Busca ondas P</span><span>Mide QRS y RR</span>":
+  '<span>FC nominal: '+(v.hr||0)+' lpm</span><span>PR: '+value(info.conductions,"PR")+'</span>'+
+  '<span>QRS: '+value(info.qrs,"QRS")+'</span><span>QT: '+value(info.qt,"QT")+'</span>';
 }
 const monitorQuizState={solved:new Set(),current:null,choices:[]};
 function startMonitorChallenge(){
@@ -126,13 +52,24 @@ function answerMonitorChallenge(chosen){
  if(ok&&monitorQuizState.solved.size>=7&&window.ECG_markPractice)window.ECG_markPractice(9);
  select.disabled=false;select.style.visibility="";
  info.innerHTML="<h2>"+r.label+"</h2><p>"+r.description.intro+"</p><ul>"+(r.description.bullets||[]).map(x=>"<li>"+x+"</li>").join("")+"</ul>";
- monitorQuizState.current=null;
+ monitorQuizState.current=null;ecgMetrics();
  document.getElementById("monitorAnother")?.addEventListener("click",startMonitorChallenge);
 }
 
 const toolbar=document.createElement("div");toolbar.className="monitor-tools";
-toolbar.innerHTML='<button type="button" id="monitorPlay">Pausar</button><label for="monitorSpeed">Velocidad <strong id="monitorSpeedLabel">1×</strong></label><input type="range" id="monitorSpeed" min=".5" max="2" step=".5" value="1" aria-label="Velocidad de reproducción"/><button type="button" id="monitorRestart">Reiniciar trazo</button>';
+toolbar.innerHTML='<button type="button" id="monitorPlay">Pausar</button>'+
+ '<button type="button" id="monitorRestart">Reiniciar trazo</button>'+
+ '<label for="monitorSpeed">Velocidad <strong id="monitorSpeedLabel">1×</strong></label>'+
+ '<input type="range" id="monitorSpeed" min=".5" max="2" step=".5" value="1" aria-label="Velocidad de animación"/>'+
+ '<button type="button" id="monitorAnnotations" aria-pressed="true">Ocultar anotaciones</button>';
 document.querySelector(".monitor-chooser")?.after(toolbar);
+const metrics=document.createElement("div");metrics.className="ecg-live-metrics";metrics.id="monitorMetrics";
+document.querySelector(".monitor-device")?.after(metrics);
+document.getElementById("monitorAnnotations").addEventListener("click",e=>{
+ state.labels=!state.labels;e.target.textContent=state.labels?"Ocultar anotaciones":"Mostrar anotaciones";
+ e.target.setAttribute("aria-pressed",String(state.labels));
+});
+
 const challengeTrigger=document.createElement("button");
 challengeTrigger.type="button";challengeTrigger.textContent="Identificar un ritmo";
 challengeTrigger.addEventListener("click",startMonitorChallenge);
@@ -146,15 +83,16 @@ monitorChallengePanel.addEventListener("click",event=>{
 });
 
 document.getElementById("monitorPlay")?.addEventListener("click",e=>{state.paused=!state.paused;e.target.textContent=state.paused?"Reproducir":"Pausar"});
-document.getElementById("monitorRestart")?.addEventListener("click",()=>state.phase=0);
+document.getElementById("monitorRestart")?.addEventListener("click",()=>{setRhythm(state.key);});
 document.getElementById("monitorSpeed")?.addEventListener("input",e=>{state.speed=Number(e.target.value);document.getElementById("monitorSpeedLabel").textContent=state.speed+"×"});
 const order=Object.keys(presets);order.forEach(key=>{const el=document.createElement("option");el.value=key;el.textContent=presets[key].label;select.appendChild(el)});
 function setRhythm(key){
  if(!presets[key])return;
- const r=presets[key];state.key=key;state.phase=0;select.value=key;
+ const r=presets[key];state.key=key;state.phase=12;state.seed+=1;state.strip=engine.generate(r,{key,seed:state.seed,duration:900});select.value=key;
  label.textContent=r.label;leadBadge.textContent=r.lead||"II";
  const bullets=(r.description?.bullets||[]).map(t=>"<li>"+t.replace(/&/g,"&amp;").replace(/</g,"&lt;")+"</li>").join("");
  info.innerHTML="<h2>"+r.label+"</h2><p>"+(r.description?.intro||"Simulación docente.")+"</p><ul>"+bullets+"</ul>";
+ ecgMetrics();
 }
 select.addEventListener("change",e=>setRhythm(e.target.value));
 setRhythm("sinus");
@@ -180,8 +118,25 @@ function draw(now){
    const time=state.phase-(w-x)/pxPerS,v=signal(time),y=range(baseline-v*pxPerMv,7,h-7);
    if(x===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
  }ctx.stroke();ctx.restore();
- ctx.fillStyle="#96c9cb";ctx.font="12px system-ui";ctx.fillText("25 mm/s  ·  10 mm/mV  ·  SIMULACIÓN",13,h-14);
- requestAnimationFrame(draw);
+ ctx.fillStyle="#96c9cb";ctx.font="12px system-ui";ctx.fillText("25 mm/s · 10 mm/mV · SEÑAL DOCENTE",13,h-14);
+ // Dibujar pulso de calibración vertical de 1 mV (10 mm) y 200 ms horizontal (5 mm).
+ ctx.save();ctx.strokeStyle="#a4cfd1";ctx.lineWidth=1.3;
+ const calX=12,calY=h*.87;
+ ctx.beginPath();ctx.moveTo(calX,calY);ctx.lineTo(calX+8,calY);ctx.lineTo(calX+8,calY-80);ctx.lineTo(calX+48,calY-80);ctx.lineTo(calX+48,calY);ctx.lineTo(calX+56,calY);ctx.stroke();
+ ctx.restore();
+ if(state.labels&&!monitorQuizState.current&&state.strip){
+  const target=state.strip.beats.find(b=>b.qrsOnset>state.phase-(w/pxPerSecond)+.60&&b.qrsOnset<state.phase-.60);
+  if(target){
+   const x=w-(state.phase-target.qrsOnset)*pxPerSecond;
+   const qx=x+target.morph.qrsWidth*pxPerSecond;
+   ctx.strokeStyle="#f4d39d";ctx.lineWidth=1;ctx.setLineDash([4,4]);
+   ctx.beginPath();ctx.moveTo(x,12);ctx.lineTo(x,h-25);ctx.moveTo(qx,12);ctx.lineTo(qx,h-25);ctx.stroke();ctx.setLineDash([]);
+   ctx.fillStyle="#f7dbb0";ctx.font="bold 11px system-ui";
+   ctx.fillText("QRS "+Math.round(target.morph.qrsWidth*1000)+" ms",Math.max(8,Math.min(w-88,x-25)),14);
+  }
+ }
+ if(state.phase>=870)state.phase=12;
+requestAnimationFrame(draw);
 }
 function resizeCanvas(){const r=canvas.getBoundingClientRect();if(r.width>0&&r.height>0){canvas.width=Math.round(r.width*(devicePixelRatio||1));canvas.height=Math.round(r.height*(devicePixelRatio||1))}}
 window.resizeCanvas=resizeCanvas;
