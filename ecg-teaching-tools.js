@@ -71,12 +71,12 @@ function calculators(){
  '<div class="teach-card"><h2>QT corregido (QTc)</h2><p>El QT depende de la frecuencia. Compara dos correcciones habituales: Bazett (QT/√RR) y Fridericia (QT/∛RR). Las diferencias se acentúan en frecuencias extremas.</p>'+
  '<div class="teach-form"><label>QT medido (ms)<input id="teachQT" inputmode="decimal" type="text" value="400"/></label><label>Frecuencia (lpm)<input id="teachHR" inputmode="decimal" type="text" value="75"/></label><button class="btn primary" data-teach-calc="qtc">Calcular QTc</button></div>'+
  '<div id="teachQTResult" role="status">'+(qtcResult?qtcResult.error?'<p class="teach-feedback incorrect">'+esc(qtcResult.error)+'</p>':'<div class="teach-feedback correct"><strong>Bazett: '+Math.round(qtcResult.bazett)+' ms · Fridericia: '+Math.round(qtcResult.fridericia)+' ms</strong><p>RR = '+qtcResult.rr.toFixed(3)+' s. No diagnosticar un síndrome de QT largo solo a partir de la calculadora: comprobar fin de T, derivación, fármacos, electrolitos y clínica.</p></div>':'')+'</div></div></div>'+
- '<div class="action-row"><button type="button" class="btn secondary" data-teach-go-axis="true">Aprender y calcular el eje →</button></div>'+
+ '<div class="action-row"><button type="button" class="btn secondary" data-action="open-axis">Aprender y calcular el eje →</button></div>'+
  '<p class="teach-footnote">Diseño didáctico original tomando como referencia las categorías de calculadoras de My EKG; fórmulas estándar y límites explicitados. No copiar interfaces ajenas.</p></section>';
 }
 function readField(id){const x=document.getElementById(id);if(!x)throw Error("Falta el campo "+id);return num(x.value)}
 document.body.addEventListener("click",event=>{
- const t=event.target.closest("[data-teach-axis-answer],[data-teach-axis-next],[data-teach-calc],[data-teach-go-axis]");
+ const t=event.target.closest("[data-teach-axis-answer],[data-teach-axis-next],[data-teach-calc]");
  if(!t)return;
  if(t.dataset.teachAxisAnswer){
   if(choice!==null)return;
