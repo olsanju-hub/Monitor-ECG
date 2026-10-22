@@ -10,6 +10,7 @@ on:
       - "visual-labs.js"
       - "visual-labs-core.js"
       - "academia.js"
+      - "styles.css"
       - "tests/**"
       - ".github/workflows/validate-ecg.yml"
   pull_request:
@@ -33,3 +34,18 @@ jobs:
       - uses: actions/checkout@v4
       - name: Motor y secuencias de ritmo
         run: node --test tests/ecg-engine.test.cjs tests/visual-labs.test.cjs tests/visual-labs-ui.test.cjs
+
+  responsive-browser:
+    name: Comprobar móvil y escritorio
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Instalar navegador de pruebas
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Comprobar 375, 390, 430, 768 y 1440 px
+        run: node tests/mobile-layout.e2e.cjs
