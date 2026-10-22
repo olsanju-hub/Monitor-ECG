@@ -20,7 +20,7 @@ No se incluye el PDF completo en el repositorio público por derechos de autor.
 En la carpeta del repositorio inicia un servidor HTTP estático (por ejemplo, python3 -m http.server 8080). Visita http://localhost:8080. El service worker requiere HTTPS o localhost.
 
 ## Publicar con GitHub Pages
-Incluida la automatización en .github/workflows/deploy-pages.yml. En Settings > Pages, configura Build and deployment > Source: GitHub Actions. Repite la acción Publicar ECG si es necesario. Usa el enlace confirmado por GitHub después de una publicación exitosa. En iPhone Safari puedes usar Compartir > Añadir a pantalla de inicio.
+Se mantiene la publicación ya existente del repositorio mediante GitHub Pages (fuente: rama main). La aplicación se actualiza mediante el servicio automático de Pages. Verifica el despliegue efectivo en Actions > pages build and deployment. No activar un segundo despliegue paralelo en GitHub Actions. En iPhone Safari puedes usar Compartir > Añadir a pantalla de inicio.
 
 ## Referencias orientativas
 - Sajjan M. Aprenda ECG en un Día: Un Enfoque Sistemático. Edición española 2014.
@@ -35,4 +35,4 @@ Auditar todos los apartados frente al PDF, ampliar banco de ejercicios y casos, 
 
 Ejecutar: `node --test tests/ecg-engine.test.cjs`.
 
-Se incluyen pruebas de secuenciación de aurículas/ventrículos, duraciones RR/PR, P bloqueadas, arritmias, muestrario determinista y ausencia de complejos organizados en asistolia/FV. GitHub Actions ejecuta estas pruebas antes de la publicación. Superarlas demuestra coherencia computacional de los modelos probados, **no precisión diagnóstica clínica ni equivalencia con registros de pacientes**.
+Se incluyen pruebas de secuenciación de aurículas/ventrículos, duraciones RR/PR, P bloqueadas, arritmias, muestrario determinista y ausencia de complejos organizados en asistolia/FV. GitHub Actions ejecuta estas pruebas de manera independiente en el workflow Validar ECG. El resultado se debe consultar junto al despliegue; la configuración actual de Pages no bloquea automáticamente una publicación si fallan. Superarlas demuestra coherencia computacional de los modelos probados, **no precisión diagnóstica clínica ni equivalencia con registros de pacientes**.
