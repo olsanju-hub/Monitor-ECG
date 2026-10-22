@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ECG">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0A3D62"/><stop offset="1" stop-color="#086e7e"/></linearGradient></defs>
+<rect x="0" y="0" width="512" height="512" rx="102" fill="url(#g)"/>
+<path d="M58 215h79l34-76 59 158 53-192 49 110h122" fill="none" stroke="#e7fff9" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="256" y="404" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="133" font-weight="800" letter-spacing="5" fill="#fff">ECG</text>
+</svg>
