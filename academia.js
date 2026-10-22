@@ -234,7 +234,7 @@ function updateOfflineStatus(){
    if(info)info.textContent=ready?"Los recursos educativos principales ya están guardados para utilizarse sin conexión en este navegador.":"El modo offline requiere instalar el service worker y completar la carga inicial conectada.";
  };
  if(typeof caches==="undefined"){set(false);return;}
- caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v3-")))).catch(()=>set(false));
+ caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v4-")))).catch(()=>set(false));
 }
 if("serviceWorker" in navigator)window.addEventListener("load",()=>{
  navigator.serviceWorker.register("./sw.js").then(()=>navigator.serviceWorker.ready).then(updateOfflineStatus).catch(updateOfflineStatus);
