@@ -9,12 +9,12 @@ if(!C)throw Error("ECGVisualCore not loaded");
 const esc=v=>String(v).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const types={2:"conduction",3:"vectors",5:"placement",6:"measurement"};
 const count={conduction:6,vectors:6,placement:6,measurement:4};
-const state={type:"conduction",mode:"explore",index:0,angle:40,lead:"I",part:"sa",stage:0,playing:false,point:null,marks:[],last:null,correct:new Set(),pending:null,speed:900};
+const state={type:"conduction",mode:"explore",index:0,angle:40,lead:"I",part:"sa",stage:0,playing:false,point:null,marks:[],last:null,correct:new Set(),pending:null,speed:900,zoomed:false};
 let playback=null,dragging=false,dragPointer=null;
 const $=sel=>document.querySelector(sel);
 function stop(){if(playback){clearInterval(playback);playback=null;}state.playing=false;dragging=false}
 function reset(type,mode="explore"){
- stop();state.type=type;state.mode=mode;state.index=0;state.part=type==="placement"?"V1":"sa";state.stage=0;state.point=null;state.marks=[];state.last=null;state.correct=new Set();
+ stop();state.type=type;state.mode=mode;state.index=0;state.part=type==="placement"?"V1":"sa";state.stage=0;state.point=null;state.marks=[];state.last=null;state.correct=new Set();state.zoomed=false;
 }
 function prepare(type,mode="practice"){if(!count[type])return;reset(type,mode);}
 function render(chapter){
@@ -55,6 +55,9 @@ function refresh({keepScroll=false}={}){
  if(keepScroll&&oldScroll!=null){const sc=rootEl.querySelector(".lab-diagram-viewport");if(sc)sc.scrollLeft=oldScroll;}
  if(oldZoom){const sel=rootEl.querySelector("[data-lab-zoom]"),sheet=rootEl.querySelector(".lab-measure-sheet");if(sel)sel.value=oldZoom;if(sheet)sheet.style.width=Math.round(1000*Number(oldZoom))+"px";}
 }
+function viewTools(){
+ return '<div class="lab-view-tools"><span>'+(state.zoomed?'Detalle ampliado: desplaza dentro del gráfico.':'Vista completa: amplía para interactuar con precisión.')+'</span><button type="button" class="btn secondary" data-lab-action="zoom-toggle" aria-pressed="'+state.zoomed+'">'+(state.zoomed?'Ajustar a pantalla':'Ampliar detalle')+'</button></div>';
+}
 function conduction(){
  const target=C.CONDUCTION[state.index%C.CONDUCTION.length],selected=C.CONDUCTION.find(p=>p.id===state.part)||C.CONDUCTION[0];
  const active=C.CONDUCTION[state.stage%C.CONDUCTION.length];
@@ -63,8 +66,8 @@ function conduction(){
  const prompt=state.mode==="practice"?'<p class="lab-question">Localiza en la ilustración: <strong>'+esc(target.task)+'</strong></p><p class="subtle">Toca la estructura correcta; las etiquetas se ocultan durante la prueba.</p>':"";
  const controls=state.mode==="explore"?'<div class="lab-toolbar"><button type="button" class="btn secondary" data-lab-action="'+(state.playing?"pause":"play")+'">'+(state.playing?"Pausar":"Reproducir")+" secuencia"+'</button><button type="button" class="btn secondary" data-lab-action="step">Paso siguiente</button><button type="button" class="btn secondary" data-lab-action="restart">Reiniciar</button></div><div class="lab-steps">'+stageText+"</div>":"";
  const info=state.mode==="explore"?'<div class="lab-description"><strong>'+esc(selected.title)+'</strong><p>'+esc(selected.ecg)+'</p><p class="lab-note">Paso activo: '+esc(active.short)+'. '+esc(active.ecg)+'</p></div>':feedback()+nextControls();
- return top+prompt+
- '<div class="lab-diagram-viewport" aria-label="Desplazamiento horizontal de la ilustración"><svg class="lab-figure lab-heart" viewBox="0 0 720 470" role="group" aria-label="Ilustración docente original del corazón y su sistema de conducción"><defs><linearGradient id="lab-heart-fill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7d7ce"/><stop offset="1" stop-color="#df8892"/></linearGradient></defs>'+
+ return top+prompt+viewTools()+
+ '<div class="lab-diagram-viewport lab-figure-container" data-lab-zoomed="'+state.zoomed+'" aria-label="Sistema de conducción en vista completa o ampliada"><svg class="lab-figure lab-heart" viewBox="0 0 720 470" role="group" aria-label="Ilustración docente original del corazón y su sistema de conducción"><defs><linearGradient id="lab-heart-fill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7d7ce"/><stop offset="1" stop-color="#df8892"/></linearGradient></defs>'+
  '<path d="M267 84Q169 40 142 143Q118 243 228 348L343 429Q472 361 539 236Q572 142 506 97Q431 44 362 108Q309 70 267 84Z" fill="url(#lab-heart-fill)" stroke="#a45b66" stroke-width="5"/>'+
  '<path d="M199 143Q200 102 262 116Q320 127 333 215Q309 256 249 251Q191 217 199 143" fill="#ed9ba2" stroke="#b86270" stroke-width="3"/>'+
  '<path d="M365 122Q409 95 482 141Q504 209 451 241Q404 262 366 216Z" fill="#e99da2" stroke="#b86270" stroke-width="3"/>'+
@@ -108,7 +111,7 @@ function vectors(){
  const deflection=state.mode==="practice"&&!state.last?"Pendiente de predicción":Math.round(v.value*100)+" % de la amplitud máxima";
  return panel("Vectores y derivaciones","El signo depende de la proyección del vector sobre el eje de la derivación, no de su magnitud absoluta.")+
  '<p class="lab-question">'+esc(view)+'</p>'+
- '<div class="lab-diagram-viewport"><svg data-lab-vector-plot="true" class="lab-figure lab-vector" viewBox="0 0 690 440" role="img" aria-label="Vector eléctrico interactivo y eje frontal de derivaciones" style="touch-action:none"><circle cx="'+cx+'" cy="'+cy+'" r="158" fill="#eaf4f4" stroke="#b5d7d9" stroke-width="2"/>'+
+ viewTools()+'<div class="lab-diagram-viewport lab-figure-container" data-lab-zoomed="'+state.zoomed+'"><svg data-lab-vector-plot="true" class="lab-figure lab-vector" viewBox="0 0 690 440" role="img" aria-label="Vector eléctrico interactivo y eje frontal de derivaciones" style="touch-action:none"><circle cx="'+cx+'" cy="'+cy+'" r="158" fill="#eaf4f4" stroke="#b5d7d9" stroke-width="2"/>'+
  Object.entries(C.LEADS).map(([name,degrees])=>{const rad=degrees*Math.PI/180,ax=cx+140*Math.cos(rad),ay=cy-140*Math.sin(rad);return '<path d="M'+cx+' '+cy+' L'+ax+' '+ay+'" stroke="#c2d2d7" stroke-width="1" stroke-dasharray="5 5"/><text x="'+(cx+173*Math.cos(rad))+'" y="'+(cy-173*Math.sin(rad))+'" text-anchor="middle" fill="#486572" font-size="16" font-weight="700">'+name+'</text>'}).join("")+
  '<line x1="'+cx+'" y1="'+cy+'" x2="'+leadX+'" y2="'+leadY+'" stroke="#8b9aa5" stroke-width="6" stroke-linecap="round"/>'+
  '<path data-lab-vector-arrow d="M'+cx+' '+cy+' L'+x+' '+y+'" stroke="#087c8d" stroke-width="10" stroke-linecap="round"/>'+
@@ -136,7 +139,7 @@ function placement(){
  const intro=explore?'<p class="lab-question">Elige un electrodo para consultar referencias anatómicas. V4 se coloca antes de V3.</p>':
  '<p class="lab-question">Sitúa <strong>'+name+'</strong> sobre el tórax sin ver la solución.</p><p class="subtle">Desplaza lateralmente la ilustración en el móvil. Pulsa una vez sobre el punto elegido.</p>';
  return panel("Colocación de V1–V6","Tórax docente orientado de frente. Los espacios y las líneas se señalan para razonar la colocación.")+intro+
- '<div class="lab-diagram-viewport lab-pan" aria-label="Desplaza horizontalmente para localizar electrodos">'+torso+'</div>'+
+ viewTools()+'<div class="lab-diagram-viewport lab-figure-container lab-pan" data-lab-zoomed="'+state.zoomed+'" aria-label="Tórax en vista completa o ampliada">'+torso+'</div>'+
  (explore?'<div class="lab-key-grid">'+Object.entries(C.ELECTRODES).map(([k])=>'<button class="lab-key '+(state.part===k?'selected':'')+'" data-lab-electrode="'+k+'">'+k+'</button>').join("")+'</div><div class="lab-description"><strong>'+esc(state.part.match(/^V/)?state.part:"V1")+'</strong><p>'+esc(C.ELECTRODES[state.part]?.text||C.ELECTRODES.V1.text)+'</p><p class="lab-note">V1 y V2: cuarto espacio intercostal. V4: quinto espacio, línea medioclavicular. V5 y V6: mismo plano horizontal que V4.</p></div>':
  feedback()+nextControls())+summary();
 }
@@ -176,6 +179,7 @@ function answer(part){
  refresh({keepScroll:true});
 }
 function action(name){
+ if(name==="zoom-toggle"){state.zoomed=!state.zoomed;refresh({keepScroll:state.zoomed});return}
  if(name==="play"){
   stop();state.playing=true;refresh({keepScroll:true});
   playback=setInterval(()=>{if(!$("#ecg-lab")){stop();return;}state.stage=(state.stage+1)%6;refresh({keepScroll:true});},state.speed);
