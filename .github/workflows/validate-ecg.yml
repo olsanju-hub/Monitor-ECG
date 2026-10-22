@@ -46,6 +46,6 @@ jobs:
       - name: Instalar navegador de pruebas
         run: |
           npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium
+          command -v google-chrome || command -v chromium || command -v chromium-browser
       - name: Comprobar 375, 390, 430, 768 y 1440 px
         run: node tests/mobile-layout.e2e.cjs
