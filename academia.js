@@ -208,10 +208,23 @@ document.body.addEventListener("click",e=>{
  return;
  }
 });
-document.body.addEventListener("input",e=>{if(e.target.id==="vectorSlider"){vectorAngle=Number(e.target.value);const old=document.querySelector(".diagram-card");if(old)old.innerHTML='<div class="row-between"><div><p class="eyebrow">LABORATORIO VISUAL</p><h2>Observa y experimenta</h2></div><span class="pill neutral">SVG interactivo</span></div>'+vectorSvg();}});
+document.body.addEventListener("input",e=>{if(e.target.id==="vectorSlider"){
+ vectorAngle=Number(e.target.value);const a=vectorAngle*Math.PI/180,x=295+175*Math.cos(a),y=180-175*Math.sin(a);
+ const p=document.querySelector('.vector-svg path[stroke="#0d7484"]');
+ const dot=document.querySelector('.vector-svg circle[fill="#0d7484"]');
+ const label=document.getElementById("angleLabel");
+ if(p)p.setAttribute("d","M295 180L"+x+" "+y);
+ if(dot){dot.setAttribute("cx",x);dot.setAttribute("cy",y);}
+ if(label)label.textContent=vectorAngle+"°";
+ const svg=document.querySelector(".vector-svg"),txt=svg?.querySelectorAll("text");
+ if(txt&&txt.length)txt[txt.length-1].textContent="Proyección en I: "+Math.cos(a).toFixed(2);
+ }});
 window.ECG_markPractice=(chapterNumber)=>{if([5,6,7,8,9].includes(chapterNumber)){S.practice[chapterNumber]=true;save();}};
 document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
-setInterval(()=>{if(!document.hidden&&S.pretest){S.seconds+=15;save()}},15000);
+let lastInteraction=Date.now();
+document.addEventListener("pointerdown",()=>lastInteraction=Date.now(),{passive:true});
+document.addEventListener("keydown",()=>lastInteraction=Date.now());
+setInterval(()=>{if(!document.hidden&&S.pretest&&Date.now()-lastInteraction<60000){S.seconds+=15;save()}},15000);
 if("serviceWorker" in navigator)window.addEventListener("load",()=>{navigator.serviceWorker.register("./sw.js").catch(()=>{});});
 render();
 })();
