@@ -7,7 +7,7 @@ Aplicación educativa sin cuentas, con progreso local, integrada con un monitor 
 - Diez capítulos y 69 microlecciones docentes originales estructuradas según el temario de Aprenda ECG en un día (2014).
 - Evaluación inicial, test por capítulo, test acumulativo y examen final con banco inicial de preguntas originales.
 - Explicaciones, SVG docente de conducción, vectores y electrodos precordiales; medición interactiva RR/FC sobre papel ECG.
-- Monitor con ritmos seleccionables, pausa, velocidad, cuadrícula, y retos de reconocimiento de trazados.
+- Monitor v2 con síntesis temporal determinista de ondas P, QRS y repolarización; pausa, velocidad, cuadrícula calibrada 25 mm/s y 10 mm/mV, marcadores QRS y retos de reconocimiento. Incluye algoritmos separados para FA, flutter, Mobitz I/II, bloqueo AV completo, ectopias, TV, torsades y FV. Sigue siendo simulación docente sin validación clínica.
 - Guardado automático local; exportar/importar JSON; reiniciar capítulo o progreso completo.
 - Manifest y service worker offline-first para ficheros esenciales después de la primera carga.
 
@@ -30,3 +30,9 @@ Incluida la automatización en .github/workflows/deploy-pages.yml. En Settings >
 
 ## Próximas mejoras
 Auditar todos los apartados frente al PDF, ampliar banco de ejercicios y casos, SVG de doce derivaciones con corrección clínica y prueba real del offline/PWA en dispositivos.
+
+## Pruebas automáticas del monitor
+
+Ejecutar: `node --test tests/ecg-engine.test.cjs`.
+
+Se incluyen pruebas de secuenciación de aurículas/ventrículos, duraciones RR/PR, P bloqueadas, arritmias, muestrario determinista y ausencia de complejos organizados en asistolia/FV. GitHub Actions ejecuta estas pruebas antes de la publicación. Superarlas demuestra coherencia computacional de los modelos probados, **no precisión diagnóstica clínica ni equivalencia con registros de pacientes**.
