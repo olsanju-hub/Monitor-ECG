@@ -9,6 +9,7 @@ const select=document.getElementById("rhythmSelect"),label=document.getElementBy
 const info=document.getElementById("infoText"),leadBadge=document.getElementById("leadBadge");
 const presets=window.RHYTHMS||{},state={key:"sinus",phase:12,lastTime:0,paused:false,speed:1,strip:null,seed:101,labels:true};
 const engine=window.ECGEngine;
+const range=(v,min,max)=>Math.max(min,Math.min(max,v));
 if(!engine)throw Error("ECGEngine 2.0 is required");
 function signal(t){return engine.sample(state.strip,t);}
 function ecgMetrics(){
@@ -105,7 +106,7 @@ function draw(now){
  state.lastTime=now;
  if(!state.paused&&!document.hidden)state.phase+=dt*state.speed;
  ctx.fillStyle="#09232e";ctx.fillRect(0,0,w,h);
- const pxPerS=250,pxPerMv=100,baseline=h*.55,small=10;
+ const pxPerSecond=25*8,pxPerMv=10*8,baseline=h*.55,small=8;
  ctx.lineWidth=.55;ctx.strokeStyle="#214a50";
  for(let x=0;x<w;x+=small){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}
  for(let y=0;y<h;y+=small){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
@@ -115,7 +116,7 @@ function draw(now){
  ctx.save();ctx.beginPath();ctx.strokeStyle="#64f3bd";ctx.lineWidth=2;
  ctx.shadowColor="#20e7a5";ctx.shadowBlur=5;
  for(let x=0;x<w;x+=1.5){
-   const time=state.phase-(w-x)/pxPerS,v=signal(time),y=range(baseline-v*pxPerMv,7,h-7);
+   const time=state.phase-(w-x)/pxPerSecond,v=signal(time),y=range(baseline-v*pxPerMv,7,h-7);
    if(x===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
  }ctx.stroke();ctx.restore();
  ctx.fillStyle="#96c9cb";ctx.font="12px system-ui";ctx.fillText("25 mm/s · 10 mm/mV · SEÑAL DOCENTE",13,h-14);
