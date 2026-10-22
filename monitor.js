@@ -34,7 +34,7 @@ function startMonitorChallenge(){
  monitorQuizState.current=key;
  const distractors=available.filter(x=>x!==key).sort(()=>Math.random()-.5).slice(0,3);
  monitorQuizState.choices=[key,...distractors].sort(()=>Math.random()-.5);
- select.disabled=true;select.style.visibility="hidden";
+ select.disabled=true;select.style.visibility="hidden";ecgMetrics();
  label.textContent="¿Qué ritmo estás observando?";
  info.innerHTML="<p>Observa frecuencia, regularidad, morfología QRS y ondas auriculares antes de responder. El patrón es un esquema docente simplificado.</p>";
  const panel=document.getElementById("monitorChallengePanel");
