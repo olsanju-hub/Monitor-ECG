@@ -19,7 +19,8 @@ const countDone=()=>topics.filter(t=>S.done[t.id]).length;
 const visitedChapters=()=>new Set(Object.keys(S.visited).map(id=>getTopic(id).chapter));
 const attemptsFor=n=>S.attempts.filter(a=>a.chapter===n&&a.mode!=="diagnostic");
 function chapterAccuracy(n){const a=attemptsFor(n).slice(-60);return a.length?Math.round(100*a.filter(x=>x.ok).length/a.length):null}
-function mastery(n){const c=chapter(n),done=c.topics.every(t=>S.done[t.id]),a=chapterAccuracy(n);return done&&a!==null&&a>=85&&(![2,3,5,6,7,8,9].includes(n)||S.practice[n]===true)}
+function visualMastery(n){const map={2:["conduction",6],3:["vectors",6],5:["placement",6],6:["measurement",4]};if(!map[n])return !!S.practice[n];const [kind,required]=map[n];return new Set((S.visualHistory||[]).filter(x=>x.kind===kind&&x.ok).map(x=>x.taskId)).size>=required}
+function mastery(n){const c=chapter(n),done=c.topics.every(t=>S.done[t.id]),a=chapterAccuracy(n);return done&&a!==null&&a>=85&&(![2,3,5,6,7,8,9].includes(n)||visualMastery(n))}
 function estimate(){
  let remaining=0;
  chapters.forEach(c=>c.topics.forEach(t=>{if(!S.done[t.id]) remaining+=7+(c.number===7||c.number===8?3:0)}));
@@ -236,7 +237,7 @@ function updateOfflineStatus(){
    if(info)info.textContent=ready?"Los recursos educativos principales ya están guardados para utilizarse sin conexión en este navegador.":"El modo offline requiere instalar el service worker y completar la carga inicial conectada.";
  };
  if(typeof caches==="undefined"){set(false);return;}
- caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v4-")))).catch(()=>set(false));
+ caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v5-")))).catch(()=>set(false));
 }
 if("serviceWorker" in navigator)window.addEventListener("load",()=>{
  navigator.serviceWorker.register("./sw.js").then(()=>navigator.serviceWorker.ready).then(updateOfflineStatus).catch(updateOfflineStatus);
