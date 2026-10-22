@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Obtener código
         uses: actions/checkout@v4
+      - name: Verificar ritmos y tiempos del ECG
+        run: node --test tests/ecg-engine.test.cjs
       - name: Configurar Pages
         uses: actions/configure-pages@v5
       - name: Publicar archivos
