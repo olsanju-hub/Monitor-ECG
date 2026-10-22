@@ -10,3 +10,11 @@
 .correct-answer{color:#146e4c;font-weight:800}
 .wrong-answer{color:#a03744;font-weight:800}
 @media(max-width:430px){.challenge-answers{grid-template-columns:1fr}}
+
+
+/* ECG monitor v2 — parámetros del patrón calculados desde el generador. */
+.ecg-live-metrics{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0 4px}
+.ecg-live-metrics span{color:#285665;background:#e8f5f3;border:1px solid #c9e5df;border-radius:9px;padding:7px 10px;font-weight:750;font-size:.78rem;font-variant-numeric:tabular-nums}
+.monitor-panel{min-width:0}
+.monitor-device{min-height:210px}
+@media(max-width:430px){.ecg-live-metrics span{font-size:.7rem;padding:6px 8px}}
