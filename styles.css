@@ -223,3 +223,63 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
  .teach-answer{padding:10px 5px;font-size:.79rem}
  .teach-card{padding:12px}
 }
+
+
+/* ECG Visual Atlas — calm professional anatomical rendering, no cartoon effects.
+   Detail is available by intentional zoom; educational controls remain accessible.
+*/
+.lab-root{--atlas-line:#d5e4e4;--atlas-label:#34566a}
+.lab-diagram-viewport.atlas-container{
+ background:#f9fbfb;
+ border:1px solid #d9e6e5;
+ box-shadow:0 1px 2px rgba(16,66,76,.035);
+}
+.lab-figure.atlas-heart,.lab-figure.atlas-torso{
+ display:block;
+ overflow:visible;
+ shape-rendering:geometricPrecision;
+ text-rendering:geometricPrecision;
+}
+.atlas-heart .atlas-chamber-labels text{
+ paint-order:stroke fill;
+ stroke:#f4d2ce;
+ stroke-width:3px;
+ stroke-linejoin:round;
+}
+.atlas-hotspot{cursor:pointer;outline:none;transition:opacity .18s ease}
+.atlas-hotspot .atlas-hit{fill:transparent;stroke:transparent;pointer-events:all}
+.atlas-hotspot .atlas-ring{
+ fill:#ecfaf4;
+ stroke:#0c7181;
+ stroke-width:2.7;
+ transition:stroke .15s ease,fill .15s ease;
+}
+.atlas-hotspot .atlas-hot-number{font-size:10px;font-weight:800;pointer-events:none}
+.atlas-hotspot[data-selected="true"] .atlas-ring{
+ fill:#0a6173;
+ stroke:#f8d48c;
+ stroke-width:4.3px;
+}
+.atlas-hotspot:focus-visible .atlas-ring{
+ stroke:#f3aa42;
+ stroke-width:6px;
+}
+.atlas-hotspot:hover .atlas-ring{filter:drop-shadow(0 1px 3px rgba(10,92,110,.25))}
+.atlas-electrode:focus-visible>circle:nth-child(2){stroke:#f2a23d;stroke-width:5px}
+.atlas-paper{image-rendering:auto;background:#fffafa}
+.atlas-paper .teach-cursor{pointer-events:none}
+.lab-figure-container[data-lab-zoomed="true"]{scrollbar-width:thin}
+.lab-view-tools{border-bottom:1px solid var(--atlas-line);padding-bottom:10px}
+.lab-description{border-radius:12px;background:linear-gradient(150deg,#f7fbfa 0%,#f2f8f6 100%)}
+.lab-steps button.selected{box-shadow:0 2px 7px rgba(10,61,98,.12)}
+@media(max-width:780px){
+ .lab-figure-container .atlas-heart,.lab-figure-container .atlas-torso{width:100%;min-width:0;max-width:100%}
+ .lab-figure-container[data-lab-zoomed="true"] .atlas-heart{width:720px;min-width:720px;max-width:none}
+ .lab-figure-container[data-lab-zoomed="true"] .atlas-torso{width:700px;min-width:700px;max-width:none}
+ .atlas-legend-notes text,.atlas-torso-labels text{font-size:13px}
+ .lab-diagram-viewport.atlas-container{border-radius:13px}
+}
+@media(prefers-reduced-motion:reduce){
+ .atlas-hotspot .atlas-ring{transition:none}
+ .atlas-hotspot:hover .atlas-ring{filter:none}
+}
