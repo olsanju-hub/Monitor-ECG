@@ -40,6 +40,7 @@ function render(){
  if(page==="route")content.innerHTML=route();
  if(page==="learn")content.innerHTML=learn();
  if(page==="practice")content.innerHTML=practice();
+ if(page==="calculators")content.innerHTML=window.ECGTeachingTools?.calculators()||"<p>No disponible</p>";
  if(page==="progress")content.innerHTML=progress();
  if(page==="quiz")content.innerHTML=quizScreen();
  if(page==="monitor"){if(typeof resizeCanvas==="function")resizeCanvas();}
@@ -71,6 +72,8 @@ function learn(){
  heading(c.title,t.title,"Microlección "+(globalIdx+1)+" de "+topics.length+" · Contenido docente redactado a partir del temario del libro")+
  '<div class="lesson-layout"><div class="lesson-main"><section class="surface lesson-intro"><div class="tag">COMPRENDER</div><p class="lead-paragraph">'+esc(t.explanation)+'</p><div class="takeaway"><strong>Clave para interpretar</strong><p>'+esc(t.takeaway)+'</p></div></section>'+
  ([2,3,5,6].includes(t.chapter)?'<section class="surface diagram-card">'+visual(t)+'</section>':'')+
+ (t.id==='C7.3'?window.ECGTeachingTools.axis():'')+
+ (t.id==='C7.1'||t.id==='C6.5'?'<div class="surface"><h2>Entrena con números reales</h2><p>Convierte lo aprendido en una operación comprobable. La calculadora explica tanto el resultado como sus límites.</p><button class="btn primary" data-action="open-calculators">Abrir calculadoras educativas →</button></div>':'')+
  '<section class="surface"><h2>Aplicación práctica</h2><p>'+esc(t.takeaway)+' Comprueba la escala, el contexto clínico y la calidad técnica antes de establecer conclusiones.</p><details class="deep-dive"><summary>Entender mejor <span>+</span></summary><p>'+esc(t.explanation)+' Busca una segunda derivación o un ECG previo cuando la morfología sea equívoca. Una alteración aislada no siempre permite un diagnóstico definitivo.</p></details></section>'+
  '<div class="lesson-actions"><button class="btn secondary" data-action="prev-topic" '+(globalIdx===0?'disabled':'')+'>← Anterior</button><button class="btn primary" data-action="mark-topic">'+(S.done[t.id]?"Estudiado ✓":"Marcar estudiado y avanzar")+'</button><button class="btn secondary" data-action="next-topic" '+(globalIdx===topics.length-1?'disabled':'')+'>Siguiente →</button></div></div>'+
  '<aside class="lesson-aside"><div class="surface sticky-box"><p class="eyebrow">EN ESTE CAPÍTULO</p><h3>'+esc(c.title)+'</h3>'+c.topics.map(x=>'<button class="side-topic '+(x.id===t.id?'active':'')+'" data-topic="'+x.id+'"><span>'+esc(x.title)+'</span><span>'+(S.done[x.id]?'✓':'')+'</span></button>').join("")+'<button class="btn secondary full" data-test-chapter="'+c.number+'">Test del capítulo</button></div></aside></div>';
@@ -86,6 +89,7 @@ function practice(){
  '<div class="practice-grid">'+labs.map(([type,title,desc,ico])=>'<article class="surface option-card"><span class="large-icon">'+icon(ico)+'</span><h2>'+esc(title)+'</h2><p>'+esc(desc)+'</p><button class="btn primary" data-action="lab-'+type+'">Practicar</button></article>').join("")+
  '<article class="surface option-card"><span class="large-icon">'+icon("book")+'</span><h2>Test por capítulo</h2><p>Preguntas y corrección razonada.</p><label for="chapterTest" class="small-label">Capítulo</label><select id="chapterTest">'+chapters.map(ch=>'<option value="'+ch.number+'" '+(ch.number===S.activeChapter?'selected':'')+'>'+ch.number+' · '+esc(ch.title)+'</option>').join("")+'</select><button class="btn secondary" data-action="chapter-test">Iniciar test</button></article>'+
  '<article class="surface option-card"><span class="large-icon">'+icon("award")+'</span><h2>Repaso acumulativo</h2><p>Examen final y repetición prioritaria de errores.</p><div class="action-row"><button class="btn secondary" data-action="cumulative">Repasar</button><button class="btn secondary" data-action="final">Examen</button></div></article></div>'+
+ '<section class="surface section-gap"><p class="eyebrow">CÁLCULO Y RAZONAMIENTO</p><h2>Del papel ECG a la decisión</h2><p>Aprende a estimar el eje eléctrico, la frecuencia y el QT corregido; interpreta los signos antes de usar los números.</p><div class="action-row"><button class="btn primary" data-action="open-axis">Eje eléctrico: lección y seis casos →</button><button class="btn secondary" data-action="open-calculators">Frecuencia y QTc</button></div></section>'+
  '<section class="surface section-gap"><h2>Reconocimiento de arritmias</h2><p>Utiliza los retos del monitor docente para comparar trazados sintéticos y reconocer sus limitaciones.</p><button class="btn secondary" data-page="monitor">Abrir monitor →</button></section>';
 }
 function progress(){
@@ -161,6 +165,8 @@ function onAction(action){
  case "cumulative":startQuiz("cumulative");break;
  case "final":startQuiz("final");break;
  case "chapter-test":startQuiz("chapter",Number($("chapterTest")?.value||S.activeChapter));break;
+ case "open-axis":S.activeTopic="C7.3";S.activeChapter=7;page="learn";render();break;
+ case "open-calculators":page="calculators";render();break;
  case "lab-conduction":case "lab-vectors":case "lab-placement":case "lab-measurement":{
   const type=action.slice(4),number={conduction:2,vectors:3,placement:5,measurement:6}[type];
   window.ECGVisualLab?.prepare(type,"practice");
@@ -237,7 +243,7 @@ function updateOfflineStatus(){
    if(info)info.textContent=ready?"Los recursos educativos principales ya están guardados para utilizarse sin conexión en este navegador.":"El modo offline requiere instalar el service worker y completar la carga inicial conectada.";
  };
  if(typeof caches==="undefined"){set(false);return;}
- caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v6-")))).catch(()=>set(false));
+ caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v7-")))).catch(()=>set(false));
 }
 if("serviceWorker" in navigator)window.addEventListener("load",()=>{
  navigator.serviceWorker.register("./sw.js").then(()=>navigator.serviceWorker.ready).then(updateOfflineStatus).catch(updateOfflineStatus);

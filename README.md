@@ -36,3 +36,11 @@ Auditar todos los apartados frente al PDF, ampliar banco de ejercicios y casos, 
 Ejecutar: `node --test tests/ecg-engine.test.cjs`.
 
 Se incluyen pruebas de secuenciación de aurículas/ventrículos, duraciones RR/PR, P bloqueadas, arritmias, muestrario determinista y ausencia de complejos organizados en asistolia/FV. GitHub Actions ejecuta estas pruebas de manera independiente en el workflow Validar ECG. El resultado se debe consultar junto al despliegue; la configuración actual de Pages no bloquea automáticamente una publicación si fallan. Superarlas demuestra coherencia computacional de los modelos probados, **no precisión diagnóstica clínica ni equivalencia con registros de pacientes**.
+
+## Referencia docente transversal: My EKG
+
+Se ha incorporado la web https://www.my-ekg.com como referencia formativa para **los diez capítulos y el monitor**, no solo para el eje eléctrico. Consulta el mapa original de auditoría y propuestas en [docs/auditoria-docente-my-ekg.md](docs/auditoria-docente-my-ekg.md). El usuario ha confirmado autorización para consultarla como referencia: eso no implica reutilizar código o imágenes de terceros sin examinar sus derechos.
+
+Esta primera entrega crea una explicación paso a paso del eje del QRS (I/aVF/II y seis casos con voltajes sintéticos) y calculadoras didácticas propias de frecuencia y QTc, con pruebas automáticas. La auditoría del resto de los temas y de todos los trazados está **programada, no finalizada**.
+
+Las fuentes educativas se contrastan con guías y estándares clínicos cuando proceda; no se convierten simplificaciones de una web en criterios diagnósticos vinculantes. Especialmente, las recomendaciones ESC 2024 para FA utilizan CHA2DS2-VA y las ESC 2023 para SCA requieren interpretación del ECG junto con clínica, reevaluación y biomarcadores.

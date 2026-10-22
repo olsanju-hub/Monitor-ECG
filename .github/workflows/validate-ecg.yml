@@ -10,6 +10,9 @@ on:
       - "visual-labs.js"
       - "visual-labs-core.js"
       - "academia.js"
+      - "ecg-teaching-math.js"
+      - "ecg-teaching-tools.js"
+      - "curriculum.js"
       - "styles.css"
       - "tests/**"
       - ".github/workflows/validate-ecg.yml"
@@ -22,6 +25,9 @@ on:
       - "visual-labs.js"
       - "visual-labs-core.js"
       - "academia.js"
+      - "ecg-teaching-math.js"
+      - "ecg-teaching-tools.js"
+      - "curriculum.js"
       - "tests/**"
   workflow_dispatch:
 permissions:
@@ -33,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Motor y secuencias de ritmo
-        run: node --test tests/ecg-engine.test.cjs tests/visual-labs.test.cjs tests/visual-labs-ui.test.cjs
+        run: node --test tests/ecg-engine.test.cjs tests/visual-labs.test.cjs tests/visual-labs-ui.test.cjs tests/ecg-teaching-math.test.cjs
 
   responsive-browser:
     name: Comprobar móvil y escritorio

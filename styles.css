@@ -162,3 +162,64 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
  .lab-view-tools button{min-width:145px}
  .lab-correlation,.lab-description,.lab-feedback{padding:12px}
 }
+
+
+/* Eje, frecuencia y QTc: lecciones/operaciones originales con paridad móvil-escritorio */
+.teach-module{min-width:0;max-width:100%;overflow:hidden}
+.teach-module h1{color:var(--navy);font-size:clamp(1.6rem,3vw,2.6rem)}
+.teach-module h2{font-size:clamp(1.2rem,2vw,1.6rem)}
+.teach-module h3{color:var(--navy);font-size:1.08rem}
+.teach-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.teach-lead{font-size:1rem;line-height:1.7}
+.teach-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}
+.teach-steps>div{min-width:0;padding:17px;border:1px solid #d7e8e6;border-radius:13px;background:#f5faf8}
+.teach-steps strong{color:var(--navy);font-size:.9rem}
+.teach-steps p{font-size:.85rem;line-height:1.55;color:#446474;margin:9px 0 0}
+.teach-why{border:1px solid #c8dedf;border-radius:10px;padding:14px;margin:12px 0}
+.teach-why summary{color:var(--navy);font-weight:780;cursor:pointer;min-height:36px}
+.teach-why p{margin:12px 0 0;color:var(--muted)}
+.teach-card{border:1px solid #d7e5e5;padding:clamp(14px,2.3vw,23px);border-radius:14px;background:#fff;margin:17px 0;min-width:0}
+.teach-card>p{font-size:.88rem;color:#4a6573}
+.teach-three-leads{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:17px 0}
+.teach-lead{min-width:0}
+.teach-three-leads>.teach-lead{background:#f6faf9;border:1px solid #d6e8e5;border-radius:12px;padding:9px;display:flex;flex-direction:column;gap:4px}
+.teach-three-leads strong{color:var(--navy)}
+.teach-three-leads small{color:#46616e;font-size:.74rem}
+.teach-three-leads svg{width:100%;height:auto;display:block}
+.teach-answer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:13px 0}
+.teach-answer{color:var(--navy);background:#f1f8f7;border:1px solid #bcd9d9;border-radius:10px;min-height:48px;padding:12px 8px;font-weight:750}
+.teach-answer:disabled{opacity:.55}
+.teach-answer:hover:not(:disabled){background:#e3f2ef}
+.teach-feedback{padding:14px;border-radius:10px;font-size:.86rem;margin:11px 0}
+.teach-feedback.correct{color:#155b41;background:#eaf7ef;border:1px solid #abd9c2}
+.teach-feedback.incorrect{color:#803749;background:#fff3f5;border:1px solid #e8c4ca}
+.teach-feedback p{margin:7px 0 0}
+.teach-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:end;margin:17px 0}
+.teach-form label{font-size:.82rem;color:#456574;font-weight:750;display:flex;flex-direction:column;gap:6px;min-width:0}
+.teach-form input,.teach-form select{width:100%;min-width:0;min-height:44px;border:1px solid #bdd5d7;border-radius:10px;padding:10px;color:var(--navy);background:#fff;margin:0}
+.teach-form button{min-width:145px}
+.teach-results{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:12px;align-items:start;background:#f4fafa;border:1px solid #d5e9e7;border-radius:13px;padding:12px;margin:12px 0}
+.teach-results p{font-size:.85rem;line-height:1.58}
+.teach-axis-svg{width:100%;height:auto;max-height:310px}
+.teach-tool-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.teach-tool-grid .teach-card{margin:0}
+.teach-tool-grid .teach-form{grid-template-columns:1fr 1fr}
+.teach-tool-grid .teach-form button{grid-column:1/-1}
+.teach-footnote{font-size:.76rem;color:#657985;line-height:1.5;margin-top:14px}
+@media(max-width:900px){
+ .teach-steps{grid-template-columns:1fr}
+ .teach-tool-grid{grid-template-columns:1fr}
+ .teach-form{grid-template-columns:1fr 1fr}
+ .teach-form button{grid-column:1/-1;width:100%}
+ .teach-results{grid-template-columns:1fr}
+ .teach-axis-svg{max-width:360px;margin:auto}
+}
+@media(max-width:430px){
+ .teach-three-leads{gap:5px}
+ .teach-three-leads>.teach-lead{padding:6px}
+ .teach-three-leads small{font-size:.65rem}
+ .teach-form,.teach-tool-grid .teach-form{grid-template-columns:1fr}
+ .teach-answer-grid{gap:7px}
+ .teach-answer{padding:10px 5px;font-size:.79rem}
+ .teach-card{padding:12px}
+}

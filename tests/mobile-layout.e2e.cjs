@@ -65,6 +65,22 @@ async function run(){
      await checkViewport(page,"fit again "+lab+" "+width,width);
     }
    }
+   await page.locator('[data-page="practice"]:visible').first().click();
+   await page.locator('[data-action="open-axis"]').click();
+   await page.locator('#axis-masterclass').waitFor();
+   await checkViewport(page,"axis masterclass "+width,width);
+   await page.locator('[data-teach-axis-answer="normal"]').click();
+   await page.locator('.teach-feedback').first().waitFor();
+   await page.locator('[data-teach-calc="axis"]').click();
+   await page.locator('.teach-results').waitFor();
+   await checkViewport(page,"axis calculator "+width,width);
+   await page.locator('[data-page="practice"]:visible').first().click();
+   await page.locator('[data-action="open-calculators"]').click();
+   await page.locator('[data-teach-calc="rate"]').click();
+   await page.locator('#teachRateResult strong').waitFor();
+   await page.locator('[data-teach-calc="qtc"]').click();
+   await page.locator('#teachQTResult strong').waitFor();
+   await checkViewport(page,"didactic calculators "+width,width);
    console.log("PASS responsive viewport "+width+"px");
    await context.close();
   }
