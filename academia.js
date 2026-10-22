@@ -176,7 +176,7 @@ document.body.addEventListener("click",e=>{
  if(target.dataset.choice!==undefined&&quiz&&quiz.chosen===null){
  const original=Number(target.dataset.choice),q=quiz.questions[quiz.index],ok=original===q.correct;quiz.chosen=original;quiz.answers.push(ok);
  S.attempts.push({id:q.id,chapter:q.chapter,topic:q.topic,ok,mode:quiz.mode,ts:Date.now()});
- if(quiz.mode!=="diagnostic"&&quiz.mode!=="final"&&ok&&[5,6,7,8,9].includes(q.chapter))S.practice[q.chapter]=true;
+ // Acertar ABCD no acredita una competencia práctica.
  if(S.attempts.length>2000)S.attempts=S.attempts.slice(-2000);
  save();render();return;
  }
@@ -190,6 +190,7 @@ document.body.addEventListener("click",e=>{
  }
 });
 document.body.addEventListener("input",e=>{if(e.target.id==="vectorSlider"){vectorAngle=Number(e.target.value);const old=document.querySelector(".diagram-card");if(old)old.innerHTML='<div class="row-between"><div><p class="eyebrow">LABORATORIO VISUAL</p><h2>Observa y experimenta</h2></div><span class="pill neutral">SVG interactivo</span></div>'+vectorSvg();}});
+window.ECG_markPractice=(chapterNumber)=>{if([5,6,7,8,9].includes(chapterNumber)){S.practice[chapterNumber]=true;save();}};
 document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
 setInterval(()=>{if(!document.hidden&&S.pretest){S.seconds+=15;save()}},15000);
 if("serviceWorker" in navigator)window.addEventListener("load",()=>{navigator.serviceWorker.register("./sw.js").catch(()=>{});});
