@@ -7,7 +7,7 @@ const KEY="ecg-academia-v1";
 const empty=()=>({version:1,visited:{},done:{},attempts:[],practice:{},pretest:false,activeTopic:"C1.0",activeChapter:1,seconds:0,started:Date.now(),diagnosticScore:null,history:[]});
 let saved;try{saved=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){saved=null}
 let S=saved&&saved.version===1?Object.assign(empty(),saved):empty();
-let page="home",quiz=null,measure=[],vectorAngle=55,selectedElectrode="V1",recentFeedback="";
+let page="home",quiz=null,measure=[],vectorAngle=55,selectedElectrode="V1",recentFeedback="",placementMode=false,placementIndex=0,placementFeedback="";
 const $=id=>document.getElementById(id);
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){console.warn("No se pudo guardar progreso",e)}};
 const esc=str=>String(str).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -78,6 +78,7 @@ function practice(){
  return heading("ENTRENAMIENTO","Practica hasta comprender","Preguntas clínicas verificables, repaso de errores, mediciones y simulación docente.")+
  '<div class="practice-grid"><article class="surface option-card"><span class="large-icon">'+icon("activity")+'</span><h2>Test acumulativo</h2><p>Mezcla el capítulo actual con todos los que ya has estudiado. Prioriza tus errores anteriores.</p><button class="btn primary" data-action="cumulative">Comenzar 12 preguntas</button></article>'+
  '<article class="surface option-card"><span class="large-icon">'+icon("book")+'</span><h2>Test por capítulo</h2><p>Elige un capítulo para practicar sin restricciones de avance.</p><label class="small-label" for="chapterTest">Capítulo</label><select id="chapterTest">'+chapters.map(c=>'<option value="'+c.number+'" '+(c.number===S.activeChapter?'selected':'')+'>'+c.number+' · '+esc(c.title)+'</option>').join("")+'</select><button class="btn secondary" data-action="chapter-test">Iniciar evaluación</button></article>'+
+ '<article class="surface option-card"><span class="large-icon">'+icon("heart")+'</span><h2>Colocación de electrodos</h2><p>Localiza V1–V6 sobre un tórax sin ver los marcadores: evaluación táctil de posiciones.</p><button class="btn secondary" data-action="placement">Evaluar colocación</button></article>'+
  '<article class="surface option-card"><span class="large-icon">'+icon("clock")+'</span><h2>Medidor ECG</h2><p>Selecciona dos ondas R consecutivas sobre papel milimetrado para calcular el RR y la frecuencia cardíaca.</p><button class="btn secondary" data-action="measurement">Abrir laboratorio</button></article>'+
  '<article class="surface option-card"><span class="large-icon">'+icon("award")+'</span><h2>Examen final</h2><p>Evaluación interdisciplinar de los diez capítulos, sin pistas antes de responder.</p><button class="btn secondary" data-action="final">Iniciar examen</button></article></div>'+
  '<section class="surface section-gap"><div class="row-between"><h2>Laboratorio de medición</h2><span class="pill">Papel: 25 mm/s · 10 mm/mV</span></div><p class="subtle">Pulsa sobre los picos de dos R consecutivas. El sistema convierte la distancia horizontal en segundos y calcula la frecuencia.</p>'+waveSvg("measure-wave")+'<p id="measurementResult" class="feedback-compact">'+(measure.length?'Marcadores: '+measure.length+'/2':'Selecciona el primer pico R')+'</p><div class="action-row"><button class="btn secondary" data-action="clear-measure">Limpiar mediciones</button><button class="btn secondary" data-page="monitor">Ir al monitor de ritmos</button></div></section>';
@@ -137,7 +138,15 @@ function vectorSvg(){
 }
 function placementSvg(){
  const spots=[["V1",288,174],["V2",328,174],["V3",363,215],["V4",395,259],["V5",443,259],["V6",491,259]];
- return '<div class="diagram-note">Selecciona V1–V6 y localiza su posición; esquema de superficie torácica en vista frontal.</div><div class="electrode-choices">'+spots.map(s=>'<button class="chip '+(selectedElectrode===s[0]?'active':'')+'" data-electrode="'+s[0]+'">'+s[0]+'</button>').join("")+'</div><svg class="torso-svg" viewBox="0 0 750 390" role="img" aria-label="Tórax frontal con ubicaciones de precordiales"><path d="M245 35Q211 78 133 99L95 359H643L606 99Q520 81 478 37L434 35Q407 82 363 83Q318 83 288 35Z" fill="#f2d9d0" stroke="#b68882" stroke-width="4"/><path d="M364 82V340" stroke="#9f7c7b" stroke-width="5"/><path d="M196 128Q288 170 357 118M370 118Q450 172 546 128" fill="none" stroke="#cbaba5" stroke-width="3"/>'+[132,171,210,249,288].map(y=>'<path d="M199 '+y+'Q282 '+(y+15)+' 353 '+y+'M371 '+y+'Q451 '+(y+15)+' 544 '+y+'" fill="none" stroke="#e7c3bb" stroke-width="2"/>').join("")+spots.map(s=>'<circle data-electrode="'+s[0]+'" cx="'+s[1]+'" cy="'+s[2]+'" r="'+(selectedElectrode===s[0]?20:15)+'" fill="'+(selectedElectrode===s[0]?'#0d7887':'#ffffff')+'" stroke="#0d7887" stroke-width="3"/><text x="'+s[1]+'" y="'+(s[2]+5)+'" font-size="13" text-anchor="middle" fill="'+(selectedElectrode===s[0]?'white':'#0d7887')+'" font-weight="700">'+s[0]+'</text>').join("")+'</svg><p class="feedback-compact">'+esc(({"V1":"4.º espacio intercostal, borde esternal derecho.","V2":"4.º espacio intercostal, borde esternal izquierdo.","V3":"Entre V2 y V4.","V4":"5.º espacio intercostal, línea medioclavicular izquierda.","V5":"Línea axilar anterior a la altura de V4.","V6":"Línea axilar media a la altura de V4."})[selectedElectrode])+'</p>';
+ const description={"V1":"4.º espacio intercostal, borde esternal derecho.","V2":"4.º espacio intercostal, borde esternal izquierdo.","V3":"Entre V2 y V4.","V4":"5.º espacio intercostal, línea medioclavicular izquierda.","V5":"Línea axilar anterior a la altura de V4.","V6":"Línea axilar media a la altura de V4."};
+ const notice=placementMode
+ ?'<div class="diagram-note"><strong>Coloca '+spots[placementIndex][0]+'</strong> tocando la posición correcta sobre el tórax. Los puntos y etiquetas están ocultos durante la prueba.</div>'
+ :'<div class="diagram-note">Selecciona V1–V6 para estudiar su posición anatómica. En Practicar puedes evaluar tu memoria sin marcadores.</div>';
+ const chips=placementMode?'':'<div class="electrode-choices">'+spots.map(s=>'<button class="chip '+(selectedElectrode===s[0]?'active':'')+'" data-electrode="'+s[0]+'">'+s[0]+'</button>').join("")+'</div>';
+ const base='<svg class="torso-svg" '+(placementMode?'data-placement-zone="true" style="cursor:crosshair;touch-action:manipulation"':'')+' viewBox="0 0 750 390" role="img" aria-label="Tórax frontal esquemático con referencias esternales e intercostales"><path d="M245 35Q211 78 133 99L95 359H643L606 99Q520 81 478 37L434 35Q407 82 363 83Q318 83 288 35Z" fill="#f2d9d0" stroke="#b68882" stroke-width="4"/><path d="M364 82V340" stroke="#9f7c7b" stroke-width="5"/><path d="M196 128Q288 170 357 118M370 118Q450 172 546 128" fill="none" stroke="#cbaba5" stroke-width="3"/>'+
+ [132,171,210,249,288].map(y=>'<path d="M199 '+y+'Q282 '+(y+15)+' 353 '+y+'M371 '+y+'Q451 '+(y+15)+' 544 '+y+'" fill="none" stroke="#e7c3bb" stroke-width="2"/>').join("");
+ const points=placementMode?'':spots.map(s=>'<circle data-electrode="'+s[0]+'" cx="'+s[1]+'" cy="'+s[2]+'" r="'+(selectedElectrode===s[0]?20:15)+'" fill="'+(selectedElectrode===s[0]?'#0d7887':'#ffffff')+'" stroke="#0d7887" stroke-width="3"/><text x="'+s[1]+'" y="'+(s[2]+5)+'" font-size="13" text-anchor="middle" fill="'+(selectedElectrode===s[0]?'white':'#0d7887')+'" font-weight="700">'+s[0]+'</text>').join("");
+ return notice+chips+base+points+'</svg><p class="feedback-compact">'+esc(placementMode?(placementFeedback||"Toca el lugar donde colocarías el electrodo solicitado."):description[selectedElectrode])+'</p>';
 }
 function visual(t){if(t.chapter===2)return heartSvg();if(t.chapter===3)return vectorSvg();if(t.chapter===5)return placementSvg();return waveSvg("lesson-wave")}
 function onAction(action){
@@ -147,6 +156,7 @@ function onAction(action){
  case "cumulative":startQuiz("cumulative");break;
  case "final":startQuiz("final");break;
  case "chapter-test":startQuiz("chapter",Number($("chapterTest")?.value||S.activeChapter));break;
+ case "placement":placementMode=true;placementIndex=0;placementFeedback="";S.activeTopic="C5.1";page="learn";render();break;
  case "measurement":page="practice";render();setTimeout(()=>{const el=$("measure-wave");el?.scrollIntoView({block:"center",behavior:"smooth"})},80);break;
  case "clear-measure":measure=[];recentFeedback="";render();break;
  case "prev-topic":case "next-topic":{const i=topics.findIndex(t=>t.id===S.activeTopic);S.activeTopic=topics[Math.max(0,Math.min(topics.length-1,i+(action==="next-topic"?1:-1)))].id;page="learn";render();break}
@@ -164,13 +174,22 @@ function onAction(action){
 function exportData(){const b=new Blob([JSON.stringify(S,null,2)],{type:"application/json"}),url=URL.createObjectURL(b),a=document.createElement("a");a.href=url;a.download="ecg-progreso-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 $("importFile").addEventListener("change",async e=>{const file=e.target.files[0];if(!file)return;try{const v=JSON.parse(await file.text());if(v.version!==1||!v.done||!Array.isArray(v.attempts)||!v.visited)throw Error("Formato de progreso no válido");if(confirm("¿Sustituir el progreso actual por el archivo importado?")){S=Object.assign(empty(),v);save();page="progress";render()}}catch(err){alert("No se ha podido importar: "+err.message)}e.target.value=""});
 document.body.addEventListener("click",e=>{
- const target=e.target.closest("[data-page],[data-chapter],[data-topic],[data-test-chapter],[data-choice],[data-action],[data-electrode],[data-structure],[data-measure]");
+ const target=e.target.closest("[data-page],[data-chapter],[data-topic],[data-test-chapter],[data-choice],[data-action],[data-electrode],[data-structure],[data-measure],[data-placement-zone]");
  if(!target)return;
  if(target.dataset.page){page=target.dataset.page;render();return}
  if(target.dataset.chapter){S.activeChapter=Number(target.dataset.chapter);S.activeTopic=chapter(S.activeChapter).topics[0].id;page="learn";render();return}
  if(target.dataset.topic){S.activeTopic=target.dataset.topic;page="learn";render();return}
  if(target.dataset.testChapter){startQuiz("chapter",Number(target.dataset.testChapter));return}
  if(target.dataset.action){onAction(target.dataset.action);return}
+ if(target.dataset.placementZone!==undefined&&placementMode){
+ const svg=target.closest("svg"),r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*750,y=(e.clientY-r.top)/r.height*390;
+ const locations=[["V1",288,174],["V2",328,174],["V3",363,215],["V4",395,259],["V5",443,259],["V6",491,259]];
+ const goal=locations[placementIndex],d=Math.hypot(x-goal[1],y-goal[2]);
+ if(d<=30){placementIndex++;placementFeedback="Correcto: "+goal[0]+" · "+placementIndex+"/6 posiciones.";
+  if(placementIndex>=6){placementMode=false;S.practice[5]=true;placementFeedback="Seis posiciones correctas. Práctica de colocación completada.";save();}
+ }else placementFeedback="Revisa el espacio intercostal y la línea anatómica. Inténtalo de nuevo: "+goal[0]+".";
+ render();return;
+ }
  if(target.dataset.electrode){selectedElectrode=target.dataset.electrode;if(page==="learn")render();return}
  if(target.dataset.structure){$("diagramFeedback").textContent=target.dataset.structure+": estructura señalada en el sistema de conducción.";return}
  if(target.dataset.choice!==undefined&&quiz&&quiz.chosen===null){
