@@ -1,9 +1,10 @@
 /* PWA ECG: precarga offline de archivos funcionales estáticos, sin backend. */
-const CACHE="ecg-academia-v1-20261022";
+const CACHE="ecg-academia-v2-20261022";
 const ASSETS=[
  "./","./index.html","./styles.css","./academia.js","./curriculum.js",
  "./monitor.js","./rhythms.js","./rhythms-advanced.js",
- "./manifest.webmanifest","./icons/icon.svg"
+ "./manifest.webmanifest","./icons/icon.svg",
+ "./icons/icon-192.png","./icons/icon-512.png","./icons/apple-touch-icon.png"
 ];
 self.addEventListener("install",event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
