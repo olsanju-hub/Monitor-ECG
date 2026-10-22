@@ -30,7 +30,10 @@ async function checkViewport(page,where,width){
  assert.ok(Math.abs(result.viewport-width)<=2,where+": unexpected viewport");
 }
 async function run(){
- const port=await readyServer(),browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
+ const port=await readyServer();
+ const chromePaths=[process.env.CHROME_PATH,"/usr/bin/google-chrome","/usr/bin/google-chrome-stable","/usr/bin/chromium","/usr/bin/chromium-browser"];
+ const executablePath=chromePaths.find(p=>p&&fs.existsSync(p));
+ const browser=await chromium.launch({executablePath,headless:true,args:["--no-sandbox"]});
  let failures=0;
  try{
   for(const width of [375,390,430,768,1440]){
