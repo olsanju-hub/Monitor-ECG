@@ -1,43 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monitor ECG</title>
-  <meta name="description" content="Simulador educativo de ECG en una derivación." />
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0A3D62">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ECG">
+  <meta name="description" content="ECG: aprende electrocardiografía con microlecciones, test acumulativos, trazados interactivos y monitor de ritmos.">
+  <title>ECG · Academia y Monitor</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="app-shell">
-    <section class="panel panel-monitor">
-      <header class="monitor-header">
-        <p class="eyebrow">Simulación docente</p>
-        <h1 id="currentRhythmLabel">Ritmo sinusal</h1>
-      </header>
-
-      <div class="controls-block compact-block">
-        <label for="rhythmSelect">Ritmo / patrón ECG</label>
-        <select id="rhythmSelect"></select>
-      </div>
-
-      <div class="monitor-device">
-        <div class="monitor-frame">
-          <div class="lead-badge" id="leadBadge">II</div>
-          <canvas id="ecgCanvas" width="1400" height="520" aria-label="Monitor de ECG"></canvas>
+  <div class="app-layout">
+    <header class="topbar">
+      <a href="./" class="brand" aria-label="Inicio ECG">
+        <span class="brand-symbol"><svg viewBox="0 0 62 62" aria-hidden="true"><path d="M5 33h13l5-10 7 22 7-28 6 16h14" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></svg></span>
+        <span class="brand-name">ECG <small>ACADEMIA + MONITOR</small></span>
+      </a>
+      <nav class="nav-desktop" aria-label="Navegación principal">
+        <button data-page="home" class="nav-item">Inicio</button>
+        <button data-page="route" class="nav-item">Temario</button>
+        <button data-page="practice" class="nav-item">Practicar</button>
+        <button data-page="monitor" class="nav-item">Monitor</button>
+        <button data-page="progress" class="nav-item">Mi progreso</button>
+      </nav>
+      <span class="offline-chip" id="connectionIndicator">● <span>Local</span></span>
+    </header>
+    <main class="main-content">
+      <div id="screen" aria-live="polite"></div>
+      <section id="monitorView" hidden aria-label="Monitor ECG interactivo">
+        <div class="monitor-page-head">
+          <div><p class="eyebrow">SIMULADOR ELECTROCARDIOGRÁFICO</p><h1>Monitor de ritmos</h1><p class="subtle">Selecciona un patrón, observa la morfología y contrasta los criterios. Los trazados son esquemas docentes, no registros clínicos validados.</p></div>
+          <button class="btn secondary" data-page="practice">← Entrenamiento</button>
         </div>
-      </div>
-    </section>
-
-    <aside class="panel panel-info">
-      <details class="info-details" open>
-        <summary>Explicación</summary>
-        <article id="infoText" class="info-box"></article>
-      </details>
-    </aside>
-  </main>
+        <div class="monitor-layout">
+          <section class="monitor-panel">
+            <div class="row-between"><div><p class="eyebrow">DERIVACIÓN SIMULADA</p><h2 id="currentRhythmLabel">Ritmo sinusal</h2></div><span class="pill">Derivación <span id="leadBadge">II</span></span></div>
+            <div class="monitor-chooser"><label for="rhythmSelect">Ritmo o patrón</label><select id="rhythmSelect" aria-label="Seleccionar ritmo electrocardiográfico"></select></div>
+            <div class="monitor-device"><div class="monitor-frame"><canvas id="ecgCanvas" width="1400" height="520" role="img" aria-label="Simulación continua de ECG"></canvas></div></div>
+            <p class="monitor-foot">Simulación conceptual en una derivación · FC y morfología aproximadas · No sustituye ECG de 12 derivaciones.</p>
+          </section>
+          <aside class="monitor-details"><h3>Interpretación del patrón</h3><article id="infoText" class="info-box"></article><div class="safety-note">Las ondas de algunos ritmos son deliberadamente esquemáticas. No usar este monitor para diagnóstico clínico.</div></aside>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer"><span>ECG · Formación médica autónoma</span><span>Sin registro · Datos en este dispositivo · Uso docente</span></footer>
+    <nav class="nav-bottom" aria-label="Navegación móvil">
+      <button data-page="home">Inicio</button>
+      <button data-page="route">Aprender</button>
+      <button data-page="practice">Practicar</button>
+      <button data-page="monitor">Monitor</button>
+      <button data-page="progress">Progreso</button>
+    </nav>
+  </div>
+  <input type="file" id="importFile" accept=".json,application/json" hidden>
   <script src="rhythms.js"></script>
   <script src="rhythms-advanced.js"></script>
-  <script src="app-core-1.js"></script>
-  <script src="app-core-2.js"></script>
+  <script src="monitor.js"></script>
+  <script src="curriculum.js"></script>
+  <script src="academia.js"></script>
 </body>
 </html>
