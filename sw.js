@@ -1,8 +1,8 @@
 /* ECG PWA — recursos precargados y actualización network-first */
-const CACHE="ecg-academia-v4-20261022";
+const CACHE="ecg-academia-v5-20261022";
 const ASSETS=[
  "./","./index.html","./styles.css","./academia.js","./curriculum.js",
- "./ecg-engine.js","./monitor.js","./rhythms.js","./rhythms-advanced.js",
+ "./visual-labs-core.js","./visual-labs.js","./ecg-engine.js","./monitor.js","./rhythms.js","./rhythms-advanced.js",
  "./manifest.webmanifest","./icons/icon.svg","./icons/icon-192.png",
  "./icons/icon-512.png","./icons/apple-touch-icon.png"
 ];

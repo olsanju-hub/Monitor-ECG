@@ -4,7 +4,7 @@
 "use strict";
 const chapters=window.ECG_CURRICULUM,bank=window.ECG_QUESTIONS;
 const KEY="ecg-academia-v1";
-const empty=()=>({version:1,visited:{},done:{},attempts:[],practice:{},pretest:false,activeTopic:"C1.0",activeChapter:1,seconds:0,started:Date.now(),diagnosticScore:null,history:[]});
+const empty=()=>({version:1,visited:{},done:{},attempts:[],practice:{},visualHistory:[],pretest:false,activeTopic:"C1.0",activeChapter:1,seconds:0,started:Date.now(),diagnosticScore:null,history:[]});
 let saved;try{saved=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){saved=null}
 let S=saved&&saved.version===1?Object.assign(empty(),saved):empty();
 let page="home",quiz=null,measure=[],vectorAngle=55,selectedElectrode="V1",recentFeedback="",placementMode=false,placementIndex=0,placementFeedback="";
@@ -19,7 +19,8 @@ const countDone=()=>topics.filter(t=>S.done[t.id]).length;
 const visitedChapters=()=>new Set(Object.keys(S.visited).map(id=>getTopic(id).chapter));
 const attemptsFor=n=>S.attempts.filter(a=>a.chapter===n&&a.mode!=="diagnostic");
 function chapterAccuracy(n){const a=attemptsFor(n).slice(-60);return a.length?Math.round(100*a.filter(x=>x.ok).length/a.length):null}
-function mastery(n){const c=chapter(n),done=c.topics.every(t=>S.done[t.id]),a=chapterAccuracy(n);return done&&a!==null&&a>=85&&(![5,6,7,8,9].includes(n)||S.practice[n]===true)}
+function visualMastery(n){const map={2:["conduction",6],3:["vectors",6],5:["placement",6],6:["measurement",4]};if(!map[n])return !!S.practice[n];const [kind,required]=map[n];return new Set((S.visualHistory||[]).filter(x=>x.kind===kind&&x.ok).map(x=>x.taskId)).size>=required}
+function mastery(n){const c=chapter(n),done=c.topics.every(t=>S.done[t.id]),a=chapterAccuracy(n);return done&&a!==null&&a>=85&&(![2,3,5,6,7,8,9].includes(n)||visualMastery(n))}
 function estimate(){
  let remaining=0;
  chapters.forEach(c=>c.topics.forEach(t=>{if(!S.done[t.id]) remaining+=7+(c.number===7||c.number===8?3:0)}));
@@ -69,19 +70,23 @@ function learn(){
  return '<div class="lesson-head"><button class="text-link" data-page="route">← Índice del libro</button><span class="pill">Capítulo '+t.chapter+' · '+(index+1)+'/'+c.topics.length+'</span></div>'+
  heading(c.title,t.title,"Microlección "+(globalIdx+1)+" de "+topics.length+" · Contenido docente redactado a partir del temario del libro")+
  '<div class="lesson-layout"><div class="lesson-main"><section class="surface lesson-intro"><div class="tag">COMPRENDER</div><p class="lead-paragraph">'+esc(t.explanation)+'</p><div class="takeaway"><strong>Clave para interpretar</strong><p>'+esc(t.takeaway)+'</p></div></section>'+
- '<section class="surface diagram-card"><div class="row-between"><div><p class="eyebrow">LABORATORIO VISUAL</p><h2>Observa y experimenta</h2></div><span class="pill neutral">SVG interactivo</span></div>'+visual(t)+'</section>'+
+ ([2,3,5,6].includes(t.chapter)?'<section class="surface diagram-card">'+visual(t)+'</section>':'')+
  '<section class="surface"><h2>Aplicación práctica</h2><p>'+esc(t.takeaway)+' Comprueba la escala, el contexto clínico y la calidad técnica antes de establecer conclusiones.</p><details class="deep-dive"><summary>Entender mejor <span>+</span></summary><p>'+esc(t.explanation)+' Busca una segunda derivación o un ECG previo cuando la morfología sea equívoca. Una alteración aislada no siempre permite un diagnóstico definitivo.</p></details></section>'+
  '<div class="lesson-actions"><button class="btn secondary" data-action="prev-topic" '+(globalIdx===0?'disabled':'')+'>← Anterior</button><button class="btn primary" data-action="mark-topic">'+(S.done[t.id]?"Estudiado ✓":"Marcar estudiado y avanzar")+'</button><button class="btn secondary" data-action="next-topic" '+(globalIdx===topics.length-1?'disabled':'')+'>Siguiente →</button></div></div>'+
  '<aside class="lesson-aside"><div class="surface sticky-box"><p class="eyebrow">EN ESTE CAPÍTULO</p><h3>'+esc(c.title)+'</h3>'+c.topics.map(x=>'<button class="side-topic '+(x.id===t.id?'active':'')+'" data-topic="'+x.id+'"><span>'+esc(x.title)+'</span><span>'+(S.done[x.id]?'✓':'')+'</span></button>').join("")+'<button class="btn secondary full" data-test-chapter="'+c.number+'">Test del capítulo</button></div></aside></div>';
 }
 function practice(){
- return heading("ENTRENAMIENTO","Practica hasta comprender","Preguntas clínicas verificables, repaso de errores, mediciones y simulación docente.")+
- '<div class="practice-grid"><article class="surface option-card"><span class="large-icon">'+icon("activity")+'</span><h2>Test acumulativo</h2><p>Mezcla el capítulo actual con todos los que ya has estudiado. Prioriza tus errores anteriores.</p><button class="btn primary" data-action="cumulative">Comenzar 12 preguntas</button></article>'+
- '<article class="surface option-card"><span class="large-icon">'+icon("book")+'</span><h2>Test por capítulo</h2><p>Elige un capítulo para practicar sin restricciones de avance.</p><label class="small-label" for="chapterTest">Capítulo</label><select id="chapterTest">'+chapters.map(c=>'<option value="'+c.number+'" '+(c.number===S.activeChapter?'selected':'')+'>'+c.number+' · '+esc(c.title)+'</option>').join("")+'</select><button class="btn secondary" data-action="chapter-test">Iniciar evaluación</button></article>'+
- '<article class="surface option-card"><span class="large-icon">'+icon("heart")+'</span><h2>Colocación de electrodos</h2><p>Localiza V1–V6 sobre un tórax sin ver los marcadores: evaluación táctil de posiciones.</p><button class="btn secondary" data-action="placement">Evaluar colocación</button></article>'+
- '<article class="surface option-card"><span class="large-icon">'+icon("clock")+'</span><h2>Medidor ECG</h2><p>Selecciona dos ondas R consecutivas sobre papel milimetrado para calcular el RR y la frecuencia cardíaca.</p><button class="btn secondary" data-action="measurement">Abrir laboratorio</button></article>'+
- '<article class="surface option-card"><span class="large-icon">'+icon("award")+'</span><h2>Examen final</h2><p>Evaluación interdisciplinar de los diez capítulos, sin pistas antes de responder.</p><button class="btn secondary" data-action="final">Iniciar examen</button></article></div>'+
- '<section class="surface section-gap"><div class="row-between"><h2>Laboratorio de medición</h2><span class="pill">Papel: 25 mm/s · 10 mm/mV</span></div><p class="subtle">Pulsa sobre los picos de dos R consecutivas. El sistema convierte la distancia horizontal en segundos y calcula la frecuencia.</p>'+waveSvg("measure-wave")+'<p id="measurementResult" class="feedback-compact">'+(measure.length?'Marcadores: '+measure.length+'/2':'Selecciona el primer pico R')+'</p><div class="action-row"><button class="btn secondary" data-action="clear-measure">Limpiar mediciones</button><button class="btn secondary" data-page="monitor">Ir al monitor de ritmos</button></div></section>';
+ const labs=[
+ ["conduction","Sistema de conducción","Identifica estructuras, conecta el impulso con las ondas P, PR y QRS.","heart"],
+ ["vectors","Vectores eléctricos","Predice la polaridad en las derivaciones frontales.","activity"],
+ ["placement","Colocación V1–V6","Sitúa los electrodos sin etiquetas y corrige errores anatómicos.","heart"],
+ ["measurement","Mediciones ECG","Mide RR, PR, QRS y QT con cursores táctiles.","clock"]
+ ];
+ return heading("ENTRENAMIENTO","Practica hasta comprender","Las imágenes enseñan y evalúan habilidades concretas: misma funcionalidad en móvil y ordenador.")+
+ '<div class="practice-grid">'+labs.map(([type,title,desc,ico])=>'<article class="surface option-card"><span class="large-icon">'+icon(ico)+'</span><h2>'+esc(title)+'</h2><p>'+esc(desc)+'</p><button class="btn primary" data-action="lab-'+type+'">Practicar</button></article>').join("")+
+ '<article class="surface option-card"><span class="large-icon">'+icon("book")+'</span><h2>Test por capítulo</h2><p>Preguntas y corrección razonada.</p><label for="chapterTest" class="small-label">Capítulo</label><select id="chapterTest">'+chapters.map(ch=>'<option value="'+ch.number+'" '+(ch.number===S.activeChapter?'selected':'')+'>'+ch.number+' · '+esc(ch.title)+'</option>').join("")+'</select><button class="btn secondary" data-action="chapter-test">Iniciar test</button></article>'+
+ '<article class="surface option-card"><span class="large-icon">'+icon("award")+'</span><h2>Repaso acumulativo</h2><p>Examen final y repetición prioritaria de errores.</p><div class="action-row"><button class="btn secondary" data-action="cumulative">Repasar</button><button class="btn secondary" data-action="final">Examen</button></div></article></div>'+
+ '<section class="surface section-gap"><h2>Reconocimiento de arritmias</h2><p>Utiliza los retos del monitor docente para comparar trazados sintéticos y reconocer sus limitaciones.</p><button class="btn secondary" data-page="monitor">Abrir monitor →</button></section>';
 }
 function progress(){
  const e=estimate(),pct=Math.round(100*e.completed/e.total);
@@ -148,7 +153,7 @@ function placementSvg(){
  const points=placementMode?'':spots.map(s=>'<circle data-electrode="'+s[0]+'" cx="'+s[1]+'" cy="'+s[2]+'" r="'+(selectedElectrode===s[0]?20:15)+'" fill="'+(selectedElectrode===s[0]?'#0d7887':'#ffffff')+'" stroke="#0d7887" stroke-width="3"/><text x="'+s[1]+'" y="'+(s[2]+5)+'" font-size="13" text-anchor="middle" fill="'+(selectedElectrode===s[0]?'white':'#0d7887')+'" font-weight="700">'+s[0]+'</text>').join("");
  return notice+chips+base+points+'</svg><p class="feedback-compact">'+esc(placementMode?(placementFeedback||"Toca el lugar donde colocarías el electrodo solicitado."):description[selectedElectrode])+'</p>';
 }
-function visual(t){if(t.chapter===2)return heartSvg();if(t.chapter===3)return vectorSvg();if(t.chapter===5)return placementSvg();return waveSvg("lesson-wave")}
+function visual(t){return window.ECGVisualLab?.render(t.chapter)||""}
 function onAction(action){
  switch(action){
  case "diagnostic":startQuiz("diagnostic");break;
@@ -156,6 +161,11 @@ function onAction(action){
  case "cumulative":startQuiz("cumulative");break;
  case "final":startQuiz("final");break;
  case "chapter-test":startQuiz("chapter",Number($("chapterTest")?.value||S.activeChapter));break;
+ case "lab-conduction":case "lab-vectors":case "lab-placement":case "lab-measurement":{
+  const type=action.slice(4),number={conduction:2,vectors:3,placement:5,measurement:6}[type];
+  window.ECGVisualLab?.prepare(type,"practice");
+  S.activeTopic=chapter(number).topics[0].id;S.activeChapter=number;page="learn";render();break;
+ }
  case "placement":placementMode=true;placementIndex=0;placementFeedback="";S.activeTopic="C5.1";page="learn";render();break;
  case "measurement":page="practice";render();setTimeout(()=>{const el=$("measure-wave");el?.scrollIntoView({block:"center",behavior:"smooth"})},80);break;
  case "clear-measure":measure=[];recentFeedback="";render();break;
@@ -167,7 +177,7 @@ function onAction(action){
  case "retry-quiz":startQuiz(quiz.mode,quiz.n);break;
  case "export":exportData();break;
  case "import":$("importFile").click();break;
- case "reset-chapter":{const n=S.activeChapter; if(confirm("¿Reiniciar el capítulo "+n+"? Se borrarán sus respuestas, prácticas y progreso.")){chapter(n).topics.forEach(t=>{delete S.done[t.id];delete S.visited[t.id]});S.attempts=S.attempts.filter(a=>a.chapter!==n);delete S.practice[n];save();render()}break}
+ case "reset-chapter":{const n=S.activeChapter; if(confirm("¿Reiniciar el capítulo "+n+"? Se borrarán sus respuestas, prácticas y progreso.")){chapter(n).topics.forEach(t=>{delete S.done[t.id];delete S.visited[t.id]});S.attempts=S.attempts.filter(a=>a.chapter!==n);delete S.practice[n];S.visualHistory=(S.visualHistory||[]).filter(h=>h.chapter!==n);save();render()}break}
  case "reset-all":if(confirm("¿Eliminar TODO tu progreso local de ECG? Esta acción no se puede deshacer. Exporta primero una copia.")){S=empty();save();page="home";render()}break;
  }
 }
@@ -181,15 +191,6 @@ document.body.addEventListener("click",e=>{
  if(target.dataset.topic){S.activeTopic=target.dataset.topic;page="learn";render();return}
  if(target.dataset.testChapter){startQuiz("chapter",Number(target.dataset.testChapter));return}
  if(target.dataset.action){onAction(target.dataset.action);return}
- if(target.dataset.placementZone!==undefined&&placementMode){
- const svg=target.closest("svg"),r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*750,y=(e.clientY-r.top)/r.height*390;
- const locations=[["V1",288,174],["V2",328,174],["V3",363,215],["V4",395,259],["V5",443,259],["V6",491,259]];
- const goal=locations[placementIndex],d=Math.hypot(x-goal[1],y-goal[2]);
- if(d<=30){placementIndex++;placementFeedback="Correcto: "+goal[0]+" · "+placementIndex+"/6 posiciones.";
-  if(placementIndex>=6){placementMode=false;S.practice[5]=true;placementFeedback="Seis posiciones correctas. Práctica de colocación completada.";save();}
- }else placementFeedback="Revisa el espacio intercostal y la línea anatómica. Inténtalo de nuevo: "+goal[0]+".";
- render();return;
- }
  if(target.dataset.electrode){selectedElectrode=target.dataset.electrode;if(page==="learn")render();return}
  if(target.dataset.structure){$("diagramFeedback").textContent=target.dataset.structure+": estructura señalada en el sistema de conducción.";return}
  if(target.dataset.choice!==undefined&&quiz&&quiz.chosen===null){
@@ -199,14 +200,7 @@ document.body.addEventListener("click",e=>{
  if(S.attempts.length>2000)S.attempts=S.attempts.slice(-2000);
  save();render();return;
  }
- if(target.dataset.measure!==undefined){
- const svg=target.closest("svg"),rect=svg.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width*1000;
- measure.push(Math.max(0,Math.min(1000,x)));if(measure.length>2)measure=[x];
- const result=$("measurementResult"),overlay=$("measureOverlay");
- if(overlay)overlay.innerHTML=measure.map(v=>'<path d="M'+v+' 38V267" stroke="#087c8d" stroke-width="2" stroke-dasharray="6 4"/><circle cx="'+v+'" cy="42" r="7" fill="#087c8d"/>').join("");
- if(measure.length===2){const rr=Math.abs(measure[1]-measure[0])/200,hr=rr>0?60/rr:0,valid=Math.abs(rr-.8)<=.08;if(valid)S.practice[6]=true;S.practice[7]=true;result.innerHTML="RR medido: <strong>"+rr.toFixed(2)+" s</strong> · Frecuencia: <strong>"+Math.round(hr)+" lpm</strong> · "+(valid?"✓ Picos R bien identificados.":"Revisa tus marcas: en esta tira los picos R están separados aproximadamente 0,80 s.");save()}else result.textContent="Primer marcador fijado. Pulsa el siguiente pico R.";
- return;
- }
+
 });
 document.body.addEventListener("input",e=>{if(e.target.id==="vectorSlider"){
  vectorAngle=Number(e.target.value);const a=vectorAngle*Math.PI/180,x=295+175*Math.cos(a),y=180-175*Math.sin(a);
@@ -219,6 +213,15 @@ document.body.addEventListener("input",e=>{if(e.target.id==="vectorSlider"){
  const svg=document.querySelector(".vector-svg"),txt=svg?.querySelectorAll("text");
  if(txt&&txt.length)txt[txt.length-1].textContent="Proyección en I: "+Math.cos(a).toFixed(2);
  }});
+window.ECG_recordVisualExercise=({chapter,kind,taskId,ok,reason})=>{
+ if(!Array.isArray(S.visualHistory))S.visualHistory=[];
+ S.visualHistory.push({chapter,kind,taskId,ok,reason,ts:Date.now()});
+ if(S.visualHistory.length>600)S.visualHistory=S.visualHistory.slice(-600);
+ const required={conduction:6,vectors:6,placement:6,measurement:4};
+ const unique=new Set(S.visualHistory.filter(a=>a.kind===kind&&a.ok).map(a=>a.taskId));
+ if(unique.size>=required[kind])S.practice[chapter]=true;
+ save();
+};
 window.ECG_markPractice=(chapterNumber)=>{if([5,6,7,8,9].includes(chapterNumber)){S.practice[chapterNumber]=true;save();}};
 document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
 let lastInteraction=Date.now();
@@ -234,7 +237,7 @@ function updateOfflineStatus(){
    if(info)info.textContent=ready?"Los recursos educativos principales ya están guardados para utilizarse sin conexión en este navegador.":"El modo offline requiere instalar el service worker y completar la carga inicial conectada.";
  };
  if(typeof caches==="undefined"){set(false);return;}
- caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v4-")))).catch(()=>set(false));
+ caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v5-")))).catch(()=>set(false));
 }
 if("serviceWorker" in navigator)window.addEventListener("load",()=>{
  navigator.serviceWorker.register("./sw.js").then(()=>navigator.serviceWorker.ready).then(updateOfflineStatus).catch(updateOfflineStatus);
