@@ -1,0 +1,29 @@
+name: Validar ECG
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ecg-engine.js"
+      - "rhythms.js"
+      - "rhythms-advanced.js"
+      - "monitor.js"
+      - "tests/**"
+      - ".github/workflows/validate-ecg.yml"
+  pull_request:
+    paths:
+      - "ecg-engine.js"
+      - "rhythms.js"
+      - "rhythms-advanced.js"
+      - "monitor.js"
+      - "tests/**"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rhythm-regression:
+    name: Verificar secuencias ECG
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Motor y secuencias de ritmo
+        run: node --test tests/ecg-engine.test.cjs
