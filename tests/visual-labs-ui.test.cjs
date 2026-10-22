@@ -2,6 +2,8 @@
 const test=require("node:test");
 const assert=require("node:assert/strict");
 require("../visual-labs-core.js");
+require("../visual-atlas.js");
+require("../visual-trace.js");
 const listeners={};
 let html="",saved=[];
 const host={
