@@ -120,3 +120,15 @@
 .c1v-topic-nav button.active{background:#fff;color:#095d72;box-shadow:0 2px 8px rgba(11,82,92,.10)}
 .c1v-topic-nav button:focus-visible{outline:3px solid #dba144;outline-offset:2px}
 @media(max-width:390px){.c1v-topic-nav button{font-size:.73rem;padding:7px 3px}}
+
+/* Third lesson now shares the spacious chapter-one stage rather than old narrow sidebar. */
+.lesson-layout:has(.c1-einthoven-panel){grid-template-columns:minmax(0,1fr);max-width:1240px}
+.lesson-layout:has(.c1-einthoven-panel) .lesson-aside{display:none}
+.lesson-layout:has(.c1-einthoven-panel)>.lesson-main{max-width:1240px;width:100%;min-width:0}
+.lesson-layout:has(.c1-einthoven-panel) .c1-einthoven-panel{border-radius:22px;box-shadow:0 7px 24px rgba(29,79,84,.045);padding:clamp(15px,2vw,28px)}
+.lesson-layout:has(.c1-einthoven-panel) .c1-einthoven-layout{grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);gap:clamp(16px,2.5vw,30px)}
+.lesson-layout:has(.c1-einthoven-panel) .c1-einthoven-figure{border-radius:18px}
+.lesson-layout:has(.c1-einthoven-panel) .c1-triangle{max-width:650px}
+.lesson-layout:has(.c1-einthoven-panel) .c1-title h2{font-size:clamp(1.45rem,3vw,2.1rem)}
+@media(max-width:1050px){.lesson-layout:has(.c1-einthoven-panel) .c1-einthoven-layout{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:700px){.lesson-layout:has(.c1-einthoven-panel) .c1-einthoven-panel{border-radius:17px;padding:14px}.lesson-layout:has(.c1-einthoven-panel) .c1-triangle{width:100%}}
