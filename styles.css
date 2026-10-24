@@ -283,3 +283,8 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
  .atlas-hotspot .atlas-ring{transition:none}
  .atlas-hotspot:hover .atlas-ring{filter:none}
 }
+
+/* Curriculum staged release: one reviewed chapter, no redundant home dashboard */
+.chapter-grid.chapter-grid-available{grid-template-columns:minmax(0,min(100%,460px));gap:16px;justify-content:start}
+.chapter-grid-available .chapter-card{min-height:165px}
+@media(max-width:600px){.chapter-grid.chapter-grid-available{grid-template-columns:minmax(0,1fr)}}
