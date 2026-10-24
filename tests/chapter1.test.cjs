@@ -127,3 +127,25 @@ test("Wave explorer includes intervals and segments as assessable regions",()=>{
  choose("wave-mode","practice","c1v");
  assert.match(content,/EJERCICIO 1 DE 5/);
 });
+
+test("Anatomy image and vector overlays share one calibrated viewBox",()=>{
+ show("C1.0");
+ assert.match(content,/c1v-anatomy-composite/);
+ assert.match(content,/<image class="c1v-anatomy-photo" href="assets\/chapter1\/heart-anatomy\.webp"/);
+ assert.match(content,/viewBox="0 0 357 373"/);
+ for(const [id,x,y] of [["sa",125,122],["av",177,190],["his",190,225]]){
+  const mark=content.match(new RegExp('<g role="button"[^>]*data-c1v-spot="'+id+'"[^>]*>[\\s\\S]*?<circle class="c1v-spot-hit" cx="'+x+'" cy="'+y+'"'));
+  assert.ok(mark,"Missing calibrated " + id);
+ }
+});
+test("QRS and T illuminate ventricular tissue, not a second conduction pathway",()=>{
+ show("C1.0");
+ choose("go","4","c1v");
+ assert.match(content,/data-c1v-current="qrs"/);
+ assert.equal((content.match(/class="c1v-tissue c1v-tissue-qrs"/g)||[]).length,2);
+ assert.ok(!content.includes("c1v-overlay-ventricle"));
+ choose("go","5","c1v");
+ assert.match(content,/data-c1v-current="t"/);
+ assert.equal((content.match(/class="c1v-tissue c1v-tissue-t"/g)||[]).length,2);
+ assert.ok(!content.includes("c1v-overlay-recovery"));
+});
