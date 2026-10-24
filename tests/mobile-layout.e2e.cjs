@@ -70,6 +70,25 @@ async function run(){
    await page.locator('.c1-feedback.good').waitFor();
    await page.locator('[data-topic="C1.2"]').first().click();
    await checkViewport(page,"fundamentals Einthoven "+width,width);
+   assert.equal(await page.locator('.c1-einthoven-figure .c1-triangle').count(),1,"Einthoven diagram must be present");
+   assert.equal(await page.locator('.c1-site').count(),3,"Full limb names must be outside the diagram");
+   assert.match(await page.locator('.c1-clear-intro').innerText(),/Una derivación no es un electrodo/);
+   await page.locator('[data-c1-select-lead="DIII"]').click();
+   assert.equal(await page.locator('[data-c1-select-lead="DIII"]').getAttribute('aria-pressed'),"true");
+   assert.match(await page.locator('.c1-selected-detail').innerText(),/Pierna izquierda − Brazo izquierdo/);
+   await checkViewport(page,"Einthoven DIII selected "+width,width);
+   const svgCollisions=await page.locator('.c1-triangle').evaluate(svg=>{
+     const els=[...svg.querySelectorAll('.c1-fig-lead,.c1-fig-node text,.c1-fig-polarity text')];
+     const rects=els.filter(el=>Number(getComputedStyle(el).opacity)!==0).map(el=>({name:el.textContent.trim(),r:el.getBoundingClientRect()}));
+     const collisions=[];
+     for(let i=0;i<rects.length;i++)for(let j=i+1;j<rects.length;j++){
+      const a=rects[i].r,b=rects[j].r;
+      if(a.left<b.right-1&&a.right>b.left+1&&a.top<b.bottom-1&&a.bottom>b.top+1)collisions.push(rects[i].name+" / "+rects[j].name);
+     }
+     return collisions;
+   });
+   assert.deepEqual(svgCollisions,[],"SVG labels overlap at "+width+": "+svgCollisions);
+   await page.locator('[data-c1-select-lead="DI"]').click();
    await page.locator('[data-c1-potential="bi"]').evaluate(el=>{el.value="0.4";el.dispatchEvent(new Event("input",{bubbles:true}))});
    await page.locator('[data-c1-mode="practice"]').click();
    await page.locator('[data-c1-pot-answer="0.5"]').click();
