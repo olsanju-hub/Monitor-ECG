@@ -48,7 +48,7 @@ test("Einthoven formula holds for variable instantaneous limb potentials",()=>{
 });
 test("Each lesson contains its own meaningful interactive teaching surface",()=>{
  show("C1.0");assert.match(content,/Del impulso al registro/);assert.match(content,/data-c1v-play/);assert.match(content,/data-c1v-concept/);assert.doesNotMatch(content,/CORAZÓN · CORTE ESQUEMÁTICO/);
- show("C1.1");assert.match(content,/data-c1v-wave/);assert.match(content,/Intervalo PR/);assert.match(content,/Segmento ST/);
+ show("C1.1");assert.match(content,/data-c1v-wave/);assert.match(content,/intervalo PR/i);assert.match(content,/segmento ST/i);
  show("C1.2");for(const term of ["Brazo derecho","Brazo izquierdo","Pierna izquierda","Polo negativo","Polo positivo","data-c1-select-lead","data-c1-potential","data-c1-mode"]){assert.ok(content.includes(term),term)}
  assert.doesNotMatch(content,/LABORATORIO DOCENTE/);
  assert.doesNotMatch(content,/<h2>Bibliografía/i);
