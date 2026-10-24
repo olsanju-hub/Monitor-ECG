@@ -1,5 +1,5 @@
 /* ECG PWA — recursos precargados y actualización network-first */
-const CACHE="ecg-academia-v9-20261024";
+const CACHE="ecg-academia-v10-20261024";
 const ASSETS=[
  "./","./index.html","./styles.css","./academia.js","./curriculum.js","./chapter1.js","./chapter1.css",
  "./ecg-teaching-math.js","./ecg-teaching-tools.js","./visual-labs-core.js","./visual-labs.js","./visual-atlas.js","./visual-trace.js","./ecg-engine.js","./monitor.js","./rhythms.js","./rhythms-advanced.js",
