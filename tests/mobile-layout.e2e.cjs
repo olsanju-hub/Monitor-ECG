@@ -61,19 +61,31 @@ async function run(){
    await page.locator('[data-chapter="1"]').first().click();
    await page.locator('#chapter1-v2-root').waitFor();
    assert.equal(await page.locator(".c1v-heart").count(),1,"New anatomical model replaces the old schematic");
-   // Image loading is async even after the containing section appears. Wait for actual decode:
-   // checking img.complete synchronously here caused a false negative on a cold CI cache.
-   await page.locator(".c1v-anatomy-photo").evaluate(img=>img.decode());
-   const anatomy=await page.locator(".c1v-anatomy-photo").evaluate(img=>{
-     const overlay=document.querySelector(".c1v-anatomy-overlay");
-     const a=img.getBoundingClientRect(),b=overlay?.getBoundingClientRect();
-     return {loaded:img.complete&&img.naturalWidth>=350&&img.naturalHeight>=370,
-       path:img.getAttribute("src"),widthDelta:Math.abs(a.width-(b?.width||0)),
-       heightDelta:Math.abs(a.height-(b?.height||0))};
+   // One SVG viewport contains the bitmap and calibrated SVG regions.
+   const anatomy=await page.locator(".c1v-anatomy-photo").evaluate(async img=>{
+     const svg=img.closest("svg");
+     const probe=new Image();
+     probe.src=img.href.baseVal;
+     await probe.decode();
+     const base=img.getBoundingClientRect(),overlay=svg.getBoundingClientRect();
+     const vb=svg.viewBox.baseVal;
+     return {loaded:probe.complete&&probe.naturalWidth===357&&probe.naturalHeight===373,
+       path:img.href.baseVal,
+       sameSvg:svg.classList.contains("c1v-anatomy-composite"),
+       viewBox:[vb.x,vb.y,vb.width,vb.height],
+       widthDelta:Math.abs(base.width-overlay.width),heightDelta:Math.abs(base.height-overlay.height)};
    });
-   assert.ok(anatomy.loaded,"Real anatomical image must load from the repository: "+JSON.stringify(anatomy));
+   assert.ok(anatomy.loaded,"Anatomical WebP must decode in the browser: "+JSON.stringify(anatomy));
    assert.equal(anatomy.path,"assets/chapter1/heart-anatomy.webp");
-   assert.ok(anatomy.widthDelta<2&&anatomy.heightDelta<2,"SVG overlay must align to anatomical image "+JSON.stringify(anatomy));
+   assert.ok(anatomy.sameSvg,"Bitmap and vector paths must share one SVG viewport");
+   assert.deepEqual(anatomy.viewBox,[0,0,357,373]);
+   assert.ok(anatomy.widthDelta<2&&anatomy.heightDelta<2,"Anatomy should fill same viewBox "+JSON.stringify(anatomy));
+   const anchors=await page.locator(".c1v-anatomy-composite").evaluate(svg=>{
+     const labels=["sa","av","his"],positions={};
+     for(const k of labels){const el=svg.querySelector('[data-c1v-spot="'+k+'"] .c1v-spot-hit');positions[k]=[+el.getAttribute("cx"),+el.getAttribute("cy")];}
+     return positions;
+   });
+   assert.deepEqual(anchors,{sa:[125,122],av:[177,190],his:[190,225]},"Reviewed source-image landmarks must be stable on all screen widths");
    assert.equal(await page.locator(".c1v-heart [data-c1v-spot]").count(),6,"All six anatomical touch zones available");
    assert.equal(await page.locator('.c1-mini-heart').count(),0,"Legacy heart illustration must not render");
    await checkViewport(page,"renewed anatomy "+width,width);
@@ -83,6 +95,7 @@ async function run(){
    await page.locator('[data-c1v-steps="toggle"]').click();
    await page.locator('[data-c1v-go="4"]').click();
    assert.match(await page.locator('.c1v-explain').innerText(),/Miocardio ventricular/);
+   assert.equal(await page.locator('.c1v-heart-canvas[data-c1v-current="qrs"] .c1v-tissue-qrs').count(),2,"QRS represents myocardial tissue, not a Purkinje hotspot");
    await checkViewport(page,"interactive heart "+width,width);
    await page.locator('[data-c1v-concept="voltage"]').click();
    await page.locator('.c1v-feedback.correct').waitFor();
