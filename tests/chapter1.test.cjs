@@ -32,8 +32,13 @@ test("Ten fully explained questions replace the old three while all ten chapters
   assert.ok(q.reason.length>40);
  }
 });
-test("Question 8 explicitly labels BD, BI, polarities and subtraction",()=>{
- const q=E.questions[7];assert.match(q.question,/BD/);assert.match(q.question,/BI/);assert.match(q.question,/DI/);assert.match(q.question,/polo positivo/);assert.match(q.reason,/BI − BD/);assert.equal(q.choices[0],"+0,6 mV");
+test("Question 8 identifies both extremities and the poles without unexplained abbreviations",()=>{
+ const q=E.questions[7];
+ assert.match(q.question,/brazo derecho/i);assert.match(q.question,/brazo izquierdo/i);
+ assert.match(q.question,/DI/);assert.match(q.question,/\(\+\)/);assert.match(q.question,/\(−\)/);
+ assert.doesNotMatch(q.question,/\b(?:BD|BI|PI)\b/);
+ assert.match(q.reason,/brazo izquierdo − potencial del brazo derecho/i);
+ assert.equal(q.choices[0],"+0,6 mV");
 });
 test("Einthoven formula holds for variable instantaneous limb potentials",()=>{
  const scenarios=[{bd:0,bi:.6,pi:1.1},{bd:1.4,bi:-.2,pi:.1},{bd:-.6,bi:-.2,pi:-.9}];
@@ -43,7 +48,8 @@ test("Einthoven formula holds for variable instantaneous limb potentials",()=>{
 test("Each lesson contains its own meaningful interactive teaching surface",()=>{
  show("C1.0");assert.match(content,/Del impulso al registro/);assert.match(content,/galvanómetro/);assert.match(content,/data-c1-concept/);
  show("C1.1");assert.match(content,/data-c1-wave/);assert.match(content,/Intervalo PR/);assert.match(content,/Segmento ST/);
- show("C1.2");for(const term of ["DI = BI − BD","DII = PI − BD","DIII = PI − BI","data-c1-potential","data-c1-mode"]){assert.ok(content.includes(term),term)}
+ show("C1.2");for(const term of ["Brazo derecho","Brazo izquierdo","Pierna izquierda","Polo negativo","Polo positivo","data-c1-select-lead","data-c1-potential","data-c1-mode"]){assert.ok(content.includes(term),term)}
+ assert.doesNotMatch(content,/LABORATORIO DOCENTE/);
  assert.doesNotMatch(content,/<h2>Bibliografía/i);
 });
 test("Practical wave test hides the wave names and replaces them by numbered regions",()=>{
@@ -75,4 +81,23 @@ test("Conceptual question records the electrical/mechanical distinction",()=>{
  show("C1.0");choose("concept","voltage");
  assert.ok(events.some(x=>x.chapter===1&&x.taskId==="recording"&&x.ok));
  assert.match(content,/Correcto/);
+});
+
+test("Einthoven derivation control updates real polarity, formula and highlighted vector",()=>{
+ show("C1.2");choose("select-lead","DIII");
+ assert.match(content,/Derivación DIII/);
+ assert.match(content,/Pierna izquierda − brazo izquierdo/i);
+ assert.match(content,/data-c1-select-lead="DIII" class="c1-lead-choice selected"/);
+ assert.match(content,/Seleccionada DIII/);
+ for(const key of ["DI","DII","DIII"])assert.match(content,new RegExp('data-c1-select-lead="'+key+'"'));
+});
+test("Einthoven diagram keeps limb names in separated legend, not within SVG geometry",()=>{
+ show("C1.2");
+ const svg=content.match(/<svg class="c1-triangle"[\s\S]*?<\/svg>/)?.[0];
+ assert.ok(svg);
+ for(const term of ["Brazo derecho","Brazo izquierdo","Pierna izquierda"]){
+  assert.ok(!svg.includes('>'+term+'<'),term+" must remain outside diagram");
+ }
+ for(const label of ["BD","BI","PI","DI","DII","DIII"])assert.ok(svg.includes('>'+label+'</text>'),label);
+ assert.match(content,/c1-sites/);
 });

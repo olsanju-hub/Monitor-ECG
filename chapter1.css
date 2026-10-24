@@ -62,3 +62,67 @@
 .c1-module .btn{min-height:44px}
 @media(max-width:860px){.c1-physiology,.c1-einthoven-layout{grid-template-columns:minmax(0,1fr)}.c1-mini-heart{max-width:360px}}
 @media(max-width:430px){.c1-module .c1-panel{padding:12px}.c1-two-grid{grid-template-columns:minmax(0,1fr)}.c1-physiology{gap:4px}.c1-mini-heart{max-width:330px}.c1-step-actions button,.c1-wave-select button{font-size:.76rem;padding:8px 4px}.c1-answer-grid{grid-template-columns:minmax(0,1fr)}.c1-results{gap:5px}.c1-results>div{padding:10px 3px}.c1-results span{font-size:.65rem}.c1-lead-def{grid-template-columns:48px 1fr}.c1-panel-hero .c1-comment{margin-top:12px}}
+
+
+/* Einthoven · reviewed visual system: clean diagram, outside-the-art labels,
+   full names at every educational point, purposeful color highlighting. */
+.c1-module .c1-einthoven-panel{background:linear-gradient(155deg,#ffffff 0%,#f9fcfb 100%);border-color:#d2e2e1;box-shadow:0 12px 34px rgba(18,71,82,.045)}
+.c1-lead-intro{border-left:4px solid #0d8192;background:#f1f8f7;border-radius:11px;padding:15px 18px;margin:12px 0 22px}
+.c1-lead-intro strong{color:#123f53;font-size:1.06rem;line-height:1.4}
+.c1-lead-intro p{margin:5px 0 0;color:#4b6a76;font-size:.9rem}
+.c1-einthoven-layout{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);align-items:start;gap:clamp(16px,3vw,28px)}
+.c1-einthoven-figure,.c1-einthoven-guide{min-width:0}
+.c1-einthoven-figure{background:#f8fbfa;border:1px solid #e0ebea;border-radius:16px;padding:clamp(10px,2vw,20px)}
+.c1-einthoven-figure h3{margin-bottom:6px}
+.c1-einthoven-figure .c1-triangle{display:block;width:100%;max-width:640px;margin:0 auto;overflow:visible}
+.c1-fig-lead{font-size:26px;font-weight:800;letter-spacing:.015em}
+.c1-fig-node circle{fill:url(#c1-node-fill);stroke:#9fc7c8;stroke-width:2.8}
+.c1-fig-node text{fill:#164d62;font-weight:800;font-size:23px}
+.c1-fig-polarity text{fill:#245568;font-size:19px;font-weight:800}
+.c1-sites{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:4px 0}
+.c1-site{display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:6px;background:#f0f6f5;border-radius:9px;padding:10px 5px;color:#486775;min-width:0;text-align:center;font-size:.76rem;line-height:1.25}
+.c1-site-abbr{font-weight:800;color:#0c6170}
+.c1-einthoven-guide h3{margin-bottom:5px}
+.c1-einthoven-guide>.c1-muted{margin-top:5px}
+.c1-lead-choices{display:grid;gap:8px;margin:15px 0}
+.c1-lead-choice{display:grid;grid-template-columns:54px minmax(0,1fr);align-items:center;gap:12px;width:100%;min-height:62px;padding:10px 13px;background:#fff;border:1px solid #dbe7e6;border-left:4px solid var(--lead-color);border-radius:11px;text-align:left;color:#334f5e}
+.c1-lead-choice strong{color:var(--lead-color);font-weight:800;font-size:1.05rem}
+.c1-lead-choice span{font-size:.78rem;line-height:1.35}
+.c1-lead-choice.selected{background:#f0f8f7;border-color:var(--lead-color);box-shadow:0 2px 11px rgba(18,84,96,.065)}
+.c1-selected-detail{background:#f6faf9;border:1px solid #dce8e7;border-radius:13px;padding:15px 16px;border-top:3px solid var(--lead-color)}
+.c1-selected-heading{display:flex;align-items:center;gap:9px;color:#1c4b60;margin-bottom:12px}
+.c1-dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--lead-color)}
+.c1-pole-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.c1-pole-pair>div{display:grid;gap:6px;align-content:start;padding:10px;background:#fff;border:1px solid #e2edec;border-radius:9px;min-width:0}
+.c1-pole-pair span{font-size:.75rem;color:#667d88}
+.c1-pole-pair strong{font-size:.85rem;color:#234c60;overflow-wrap:break-word}
+.c1-math-line{border-top:1px solid #dfe9e8;margin:13px 0 0;padding-top:12px;font-size:.9rem;color:#244e61}
+.c1-law-result{background:#ebf6f3;border-left:4px solid #0d8192;border-radius:10px;padding:12px 15px;margin:14px 0}
+.c1-law-result>strong{font-size:.85rem;color:#176779}
+.c1-law-result p{color:#235065;font-size:.98rem;font-weight:750;margin:5px 0 0;font-variant-numeric:tabular-nums}
+.c1-parameter-grid .c1-results>div{background:#fff}
+.c1-parameter-grid .c1-results span{font-weight:800;font-size:.86rem;color:#22647a}
+.c1-lead-choice:focus-visible{outline:3px solid #dfac4b;outline-offset:2px}
+@media(max-width:1080px){.c1-einthoven-layout{grid-template-columns:minmax(0,1fr)}.c1-einthoven-figure .c1-triangle{max-width:580px}.c1-einthoven-guide{max-width:none}}
+@media(max-width:460px){
+ .c1-einthoven-figure{padding:8px}
+ .c1-lead-intro{padding:13px 14px;margin-bottom:14px}
+ .c1-lead-intro strong{font-size:.96rem}
+ .c1-sites{gap:4px}
+ .c1-site{flex-direction:column;padding:8px 3px;font-size:.67rem}
+ .c1-fig-lead{font-size:26px}
+ .c1-pole-pair{gap:6px}
+ .c1-pole-pair>div{padding:8px}
+ .c1-lead-choice{grid-template-columns:43px minmax(0,1fr)}
+ .c1-selected-detail{padding:12px}
+ .c1-law-result p{font-size:.88rem}
+}
+
+/* Intro copy now separates definition, pole identification and calculation. */
+.c1-clear-intro h3{font-size:clamp(1.1rem,2.4vw,1.35rem);color:#173f53;line-height:1.35;margin:12px 0 8px}
+.c1-clear-intro>p{font-size:.97rem;line-height:1.65;color:#496777;margin:0 0 16px}
+.c1-intro-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:16px}
+.c1-intro-steps>div{display:grid;align-content:start;gap:6px;background:#f0f7f6;border:1px solid #d9e9e5;border-radius:11px;padding:12px 14px;min-width:0}
+.c1-intro-steps strong{font-size:.87rem;line-height:1.4;color:#155266}
+.c1-intro-steps span{font-size:.82rem;line-height:1.45;color:#506a78}
+@media(max-width:850px){.c1-intro-steps{grid-template-columns:1fr}}
