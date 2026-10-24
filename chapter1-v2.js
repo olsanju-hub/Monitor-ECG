@@ -215,7 +215,7 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden){v.playing=
 const bridge={...legacy};
 legacy.render=function(topic){
  if(topic==="C1.0"||topic==="C1.1"){
-  return '<section id="chapter1-v2-root" class="c1v-module" data-topic="'+topic+'">'+(topic==="C1.0"?stageTools():wavesTool())+'</section>';
+  return '<section id="chapter1-v2-root" class="c1v-module" data-topic="'+topic+'"><nav class="c1v-topic-nav" aria-label="Lecciones del capítulo 1">'+[['C1.0','1 · Impulso'],['C1.1','2 · Ondas'],['C1.2','3 · Derivaciones']].map(([id,text])=>'<button type="button" data-topic="'+id+'" class="'+(topic===id?'active':'')+'" aria-current="'+(topic===id?'step':'false')+'">'+text+'</button>').join('')+'</nav>'+(topic==="C1.0"?stageTools():wavesTool())+'</section>';
  }
  return oldRender(topic);
 };
