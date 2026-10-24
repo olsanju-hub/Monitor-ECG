@@ -72,13 +72,13 @@ async function run(){
    await checkViewport(page,"interactive heart "+width,width);
    await page.locator('[data-c1v-concept="voltage"]').click();
    await page.locator('.c1v-feedback.correct').waitFor();
-   await page.locator('[data-topic="C1.1"]').first().click();
+   await page.locator('.c1v-topic-nav [data-topic="C1.1"]').click();
    await page.locator('#chapter1-v2-root').waitFor();
    await checkViewport(page,"renewed wave explorer "+width,width);
    await page.locator('[data-c1v-wave-mode="practice"]').click();
    await page.locator('[data-c1v-wave="P"]').click();
    await page.locator('.c1v-feedback.correct').waitFor();
-   await page.locator('[data-topic="C1.2"]').first().click();
+   await page.locator('.c1v-topic-nav [data-topic="C1.2"]').click();
    await checkViewport(page,"fundamentals Einthoven "+width,width);
    assert.equal(await page.locator('.c1-einthoven-figure .c1-triangle').count(),1,"Einthoven diagram must be present");
    assert.equal(await page.locator('.c1-site').count(),3,"Full limb names must be outside the diagram");
