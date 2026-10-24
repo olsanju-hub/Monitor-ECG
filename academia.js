@@ -19,8 +19,8 @@ const countDone=()=>topics.filter(t=>S.done[t.id]).length;
 const visitedChapters=()=>new Set(Object.keys(S.visited).map(id=>getTopic(id).chapter));
 const attemptsFor=n=>S.attempts.filter(a=>a.chapter===n&&a.mode!=="diagnostic");
 function chapterAccuracy(n){const a=attemptsFor(n).slice(-60);return a.length?Math.round(100*a.filter(x=>x.ok).length/a.length):null}
-function visualMastery(n){const map={2:["conduction",6],3:["vectors",6],5:["placement",6],6:["measurement",4]};if(!map[n])return !!S.practice[n];const [kind,required]=map[n];return new Set((S.visualHistory||[]).filter(x=>x.kind===kind&&x.ok).map(x=>x.taskId)).size>=required}
-function mastery(n){const c=chapter(n),done=c.topics.every(t=>S.done[t.id]),a=chapterAccuracy(n);return done&&a!==null&&a>=85&&(![2,3,5,6,7,8,9].includes(n)||visualMastery(n))}
+function visualMastery(n){const map={1:["fundamentals",3],2:["conduction",6],3:["vectors",6],5:["placement",6],6:["measurement",4]};if(!map[n])return !!S.practice[n];const [kind,required]=map[n];return new Set((S.visualHistory||[]).filter(x=>x.kind===kind&&x.ok).map(x=>x.taskId)).size>=required}
+function mastery(n){const c=chapter(n),done=c.topics.every(t=>S.done[t.id]),a=chapterAccuracy(n);return done&&a!==null&&a>=(n===1?80:85)&&(n!==1||attemptsFor(1).length>=10)&&(![1,2,3,5,6,7,8,9].includes(n)||visualMastery(n))}
 function estimate(){
  let remaining=0;
  chapters.forEach(c=>c.topics.forEach(t=>{if(!S.done[t.id]) remaining+=7+(c.number===7||c.number===8?3:0)}));
@@ -68,13 +68,15 @@ function route(){
 function learn(){
  const t=getTopic(S.activeTopic),c=chapter(t.chapter),index=c.topics.findIndex(x=>x.id===t.id),globalIdx=topics.findIndex(x=>x.id===t.id);
  S.visited[t.id]=true;S.activeChapter=t.chapter;
+ if(t.chapter===1)window.ECGChapter1?.setTopic(t.id);
  return '<div class="lesson-head"><button class="text-link" data-page="route">← Índice del libro</button><span class="pill">Capítulo '+t.chapter+' · '+(index+1)+'/'+c.topics.length+'</span></div>'+
- heading(c.title,t.title,"Microlección "+(globalIdx+1)+" de "+topics.length+" · Contenido docente redactado a partir del temario del libro")+
+ heading(c.title,t.title,"Microlección "+(globalIdx+1)+" de "+topics.length+" · "+(t.chapter===1?"Lección ampliada con herramientas y ejercicios prácticos":"Contenido docente redactado a partir del temario del libro"))+
  '<div class="lesson-layout"><div class="lesson-main"><section class="surface lesson-intro"><div class="tag">COMPRENDER</div><p class="lead-paragraph">'+esc(t.explanation)+'</p><div class="takeaway"><strong>Clave para interpretar</strong><p>'+esc(t.takeaway)+'</p></div></section>'+
+ (t.chapter===1?window.ECGChapter1.render(t.id):'')+
  ([2,3,5,6].includes(t.chapter)?'<section class="surface diagram-card">'+visual(t)+'</section>':'')+
  (t.id==='C7.3'?window.ECGTeachingTools.axis():'')+
  (t.id==='C7.1'||t.id==='C6.5'?'<div class="surface"><h2>Entrena con números reales</h2><p>Convierte lo aprendido en una operación comprobable. La calculadora explica tanto el resultado como sus límites.</p><button class="btn primary" data-action="open-calculators">Abrir calculadoras educativas →</button></div>':'')+
- '<section class="surface"><h2>Aplicación práctica</h2><p>'+esc(t.takeaway)+' Comprueba la escala, el contexto clínico y la calidad técnica antes de establecer conclusiones.</p><details class="deep-dive"><summary>Entender mejor <span>+</span></summary><p>'+esc(t.explanation)+' Busca una segunda derivación o un ECG previo cuando la morfología sea equívoca. Una alteración aislada no siempre permite un diagnóstico definitivo.</p></details></section>'+
+ (t.chapter===1?'':'<section class="surface"><h2>Aplicación práctica</h2><p>'+esc(t.takeaway)+' Comprueba la escala, el contexto clínico y la calidad técnica antes de establecer conclusiones.</p><details class="deep-dive"><summary>Entender mejor <span>+</span></summary><p>'+esc(t.explanation)+' Busca una segunda derivación o un ECG previo cuando la morfología sea equívoca. Una alteración aislada no siempre permite un diagnóstico definitivo.</p></details></section>')+
  '<div class="lesson-actions"><button class="btn secondary" data-action="prev-topic" '+(globalIdx===0?'disabled':'')+'>← Anterior</button><button class="btn primary" data-action="mark-topic">'+(S.done[t.id]?"Estudiado ✓":"Marcar estudiado y avanzar")+'</button><button class="btn secondary" data-action="next-topic" '+(globalIdx===topics.length-1?'disabled':'')+'>Siguiente →</button></div></div>'+
  '<aside class="lesson-aside"><div class="surface sticky-box"><p class="eyebrow">EN ESTE CAPÍTULO</p><h3>'+esc(c.title)+'</h3>'+c.topics.map(x=>'<button class="side-topic '+(x.id===t.id?'active':'')+'" data-topic="'+x.id+'"><span>'+esc(x.title)+'</span><span>'+(S.done[x.id]?'✓':'')+'</span></button>').join("")+'<button class="btn secondary full" data-test-chapter="'+c.number+'">Test del capítulo</button></div></aside></div>';
 }
@@ -223,7 +225,7 @@ window.ECG_recordVisualExercise=({chapter,kind,taskId,ok,reason})=>{
  if(!Array.isArray(S.visualHistory))S.visualHistory=[];
  S.visualHistory.push({chapter,kind,taskId,ok,reason,ts:Date.now()});
  if(S.visualHistory.length>600)S.visualHistory=S.visualHistory.slice(-600);
- const required={conduction:6,vectors:6,placement:6,measurement:4};
+ const required={fundamentals:3,conduction:6,vectors:6,placement:6,measurement:4};
  const unique=new Set(S.visualHistory.filter(a=>a.kind===kind&&a.ok).map(a=>a.taskId));
  if(unique.size>=required[kind])S.practice[chapter]=true;
  save();
@@ -243,7 +245,7 @@ function updateOfflineStatus(){
    if(info)info.textContent=ready?"Los recursos educativos principales ya están guardados para utilizarse sin conexión en este navegador.":"El modo offline requiere instalar el service worker y completar la carga inicial conectada.";
  };
  if(typeof caches==="undefined"){set(false);return;}
- caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v8-")))).catch(()=>set(false));
+ caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v9-")))).catch(()=>set(false));
 }
 if("serviceWorker" in navigator)window.addEventListener("load",()=>{
  navigator.serviceWorker.register("./sw.js").then(()=>navigator.serviceWorker.ready).then(updateOfflineStatus).catch(updateOfflineStatus);
