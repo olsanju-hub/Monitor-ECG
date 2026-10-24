@@ -13,7 +13,7 @@ const E=global.ECGChapter1;
 function show(id){E.setTopic(id);host.dataset.topic=id;content=E.render(id);}
 function fake(kind,key){
  const attr="data-c1-"+kind;
- const datasetKey=kind.replace(/-([a-z])/g,(_,ch)=>ch.toUpperCase());
+ const datasetKey="c1"+kind.charAt(0).toUpperCase()+kind.slice(1).replace(/-([a-z])/g,(_,ch)=>ch.toUpperCase());
  const el={dataset:{[datasetKey]:key},hasAttribute(v){return v===attr}};
  el.closest=()=>el;
  return el;
