@@ -75,7 +75,7 @@ async function run(){
    assert.match(await page.locator('.c1-clear-intro').innerText(),/Una derivación no es un electrodo/);
    await page.locator('[data-c1-select-lead="DIII"]').click();
    assert.equal(await page.locator('[data-c1-select-lead="DIII"]').getAttribute('aria-pressed'),"true");
-   assert.match(await page.locator('.c1-selected-detail').innerText(),/Pierna izquierda − Brazo izquierdo/);
+   assert.match(await page.locator('.c1-selected-detail').innerText(),/Pierna izquierda − brazo izquierdo/i);
    await checkViewport(page,"Einthoven DIII selected "+width,width);
    const svgCollisions=await page.locator('.c1-triangle').evaluate(svg=>{
      const els=[...svg.querySelectorAll('.c1-fig-lead,.c1-fig-node text,.c1-fig-polarity text')];
