@@ -61,6 +61,17 @@ async function run(){
    await page.locator('[data-chapter="1"]').first().click();
    await page.locator('#chapter1-v2-root').waitFor();
    assert.equal(await page.locator(".c1v-heart").count(),1,"New anatomical model replaces the old schematic");
+   const anatomy=await page.locator(".c1v-anatomy-photo").evaluate(img=>{
+     const overlay=document.querySelector(".c1v-anatomy-overlay");
+     const a=img.getBoundingClientRect(),b=overlay?.getBoundingClientRect();
+     return {loaded:img.complete&&img.naturalWidth>=350&&img.naturalHeight>=370,
+       path:img.getAttribute("src"),widthDelta:Math.abs(a.width-(b?.width||0)),
+       heightDelta:Math.abs(a.height-(b?.height||0))};
+   });
+   assert.ok(anatomy.loaded,"Real anatomical image must load from the repository: "+JSON.stringify(anatomy));
+   assert.equal(anatomy.path,"assets/chapter1/heart-anatomy.webp");
+   assert.ok(anatomy.widthDelta<2&&anatomy.heightDelta<2,"SVG overlay must align to anatomical image "+JSON.stringify(anatomy));
+   assert.equal(await page.locator(".c1v-heart [data-c1v-spot]").count(),6,"All six anatomical touch zones available");
    assert.equal(await page.locator('.c1-mini-heart').count(),0,"Legacy heart illustration must not render");
    await checkViewport(page,"renewed anatomy "+width,width);
    await page.locator('[data-c1v-nav="next"]').click();

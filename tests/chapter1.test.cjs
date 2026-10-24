@@ -106,7 +106,9 @@ test("Einthoven diagram keeps limb names in separated legend, not within SVG geo
 test("Chapter 1 reuses no legacy schematic heart and has 6 stepped heart states",()=>{
  show("C1.0");
  assert.match(content,/c1v-heart/);
- assert.match(content,/Modelo anatómico ilustrativo/);
+ assert.match(content,/Ilustración anatómica semirrealista/);
+ assert.match(content,/assets\/chapter1\/heart-anatomy\.webp/);
+ assert.match(content,/c1v-anatomy-overlay/);
  assert.match(content,/data-c1v-current="sa"/);
  assert.doesNotMatch(content,/atlas-hotspot|atlas-chamber-labels/);
  assert.equal(global.ECGChapter1V2.steps.length,6);
