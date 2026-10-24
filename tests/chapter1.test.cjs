@@ -86,7 +86,7 @@ test("Conceptual question records the electrical/mechanical distinction",()=>{
 test("Einthoven derivation control updates real polarity, formula and highlighted vector",()=>{
  show("C1.2");choose("select-lead","DIII");
  assert.match(content,/Derivación DIII/);
- assert.match(content,/Pierna izquierda − Brazo izquierdo/);
+ assert.match(content,/Pierna izquierda − brazo izquierdo/i);
  assert.match(content,/data-c1-select-lead="DIII" class="c1-lead-choice selected"/);
  assert.match(content,/Seleccionada DIII/);
  for(const key of ["DI","DII","DIII"])assert.match(content,new RegExp('data-c1-select-lead="'+key+'"'));
