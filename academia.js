@@ -71,7 +71,7 @@ function learn(){
  S.visited[t.id]=true;S.activeChapter=t.chapter;
  if(t.chapter===1)window.ECGChapter1?.setTopic(t.id);
  return '<div class="lesson-head"><button class="text-link" data-page="route">← Índice del libro</button><span class="pill">Capítulo '+t.chapter+' · '+(index+1)+'/'+c.topics.length+'</span></div>'+
- heading(c.title,t.title,"Microlección "+(globalIdx+1)+" de "+topics.length+" · "+(t.chapter===1?"Lección ampliada con herramientas y ejercicios prácticos":"Contenido docente redactado a partir del temario del libro"))+
+ heading(c.title,t.title,"Microlección "+(globalIdx+1)+" de "+topics.length+" · "+(t.chapter===1?"Animación, exploración y práctica":"Contenido docente redactado a partir del temario del libro"))+
  '<div class="lesson-layout"><div class="lesson-main">'+
  (t.id==="C1.2"?'<section class="surface lesson-intro c1-clear-intro"><div class="tag">COMPRENDER</div><h3>Una derivación no es un electrodo.</h3><p>Un electrodo capta la actividad eléctrica desde la piel. Una derivación compara el potencial de dos polos definidos.</p><div class="c1-intro-steps"><div><strong>1. Identifica los polos</strong><span>Comprueba qué extremidad es positiva y cuál es negativa.</span></div><div><strong>2. Calcula la diferencia</strong><span>Al valor del polo positivo réstale el del negativo.</span></div><div><strong>3. Relaciona DI, DII y DIII</strong><span>Compara valores obtenidos en el mismo instante.</span></div></div></section>':
  '<section class="surface lesson-intro"><div class="tag">COMPRENDER</div><p class="lead-paragraph">'+esc(t.explanation)+'</p><div class="takeaway"><strong>Clave para interpretar</strong><p>'+esc(t.takeaway)+'</p></div></section>')+
@@ -241,7 +241,7 @@ function updateOfflineStatus(){
    if(info)info.textContent=ready?"Los recursos educativos principales ya están guardados para utilizarse sin conexión en este navegador.":"El modo offline requiere instalar el service worker y completar la carga inicial conectada.";
  };
  if(typeof caches==="undefined"){set(false);return;}
- caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v11-")))).catch(()=>set(false));
+ caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v12-")))).catch(()=>set(false));
 }
 if("serviceWorker" in navigator)window.addEventListener("load",()=>{
  navigator.serviceWorker.register("./sw.js").then(()=>navigator.serviceWorker.ready).then(updateOfflineStatus).catch(updateOfflineStatus);
