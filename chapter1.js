@@ -59,7 +59,7 @@ function record(taskId,ok,reason){
 function title(text,subtitle){
  return '<div class="c1-title"><p class="eyebrow">CAPÍTULO 1 · LABORATORIO DOCENTE</p><h2>'+esc(text)+'</h2><p>'+esc(subtitle)+'</p></div>';
 }
-function waveGraphic(selected,showLabels=true){
+function waveGraphic(selected,showLabels=true,interactive=false){
  const active=selected||"none";
  const curve={
  P:"M25 115H77C87 115 91 100 101 100C115 100 120 115 134 115",
@@ -69,7 +69,9 @@ function waveGraphic(selected,showLabels=true){
  const labels=showLabels?'<g font-size="15" font-weight="800" text-anchor="middle" fill="#274d5e"><text x="104" y="81">P</text><text x="195" y="17">R</text><text x="354" y="61">T</text></g>':"";
  return '<svg class="c1-wave-svg" viewBox="0 0 490 180" role="img" aria-label="ECG didáctico con onda P, complejo QRS y onda T. Trazado sintético, no clínico."><defs><pattern id="c1-small" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0H0V10" stroke="#e9d3d8" stroke-width=".6" fill="none"/></pattern><pattern id="c1-large" width="50" height="50" patternUnits="userSpaceOnUse"><rect width="50" height="50" fill="url(#c1-small)"/><path d="M50 0H0V50" stroke="#d8abb6" stroke-width="1" fill="none"/></pattern></defs><rect width="490" height="180" rx="12" fill="#fffbfa"/><rect width="490" height="180" fill="url(#c1-large)"/>'+
  Object.entries(curve).map(([k,path])=>'<path d="'+path+'" fill="none" stroke="'+(active===k?"#087b8c":"#4b6573")+'" stroke-width="'+(active===k?5:2.7)+'" stroke-linejoin="round" stroke-linecap="round"/>').join("")+
- labels+'<text x="16" y="168" font-size="11.7" fill="#58737b">Esquema eléctrico, no ECG diagnóstico</text></svg>';
+ labels+(interactive?'<g class="c1-selectable-waves">'+
+ [["P",72,130,104,1],["QRS",164,227,195,2],["T",313,409,354,3]].map(([key,x1,x2,xc,n])=>'<g role="button" tabindex="0" data-c1-wave="'+key+'" aria-label="Seleccionar zona '+n+' del trazado"><rect x="'+x1+'" y="0" width="'+(x2-x1)+'" height="148" rx="9" fill="transparent" stroke="transparent"/><rect x="'+(xc-15)+'" y="139" width="30" height="23" rx="9" fill="#e5f4f2" stroke="#9bbfc4"/><text x="'+xc+'" y="155" text-anchor="middle" font-weight="800" font-size="14" fill="#125768">'+n+'</text></g>').join("")+'</g>':'')+
+ '<text x="16" y="176" font-size="11.7" fill="#58737b">Esquema eléctrico, no ECG diagnóstico</text></svg>';
 }
 function phaseTool(){
  const p=PHASES[state.phase];
@@ -78,17 +80,17 @@ function phaseTool(){
  return title("Del impulso al registro","Explora qué actividad eléctrica se registra y qué información no proporciona el ECG.")+
  '<div class="c1-panel c1-panel-hero"><div class="c1-physiology"><div class="c1-mini-heart">'+heart+'</div><div><span class="c1-step">FASE '+(state.phase+1)+' DE 3</span><h3>'+p.title+'</h3><p>'+p.when+'</p><p class="c1-muted">La actividad eléctrica precede a la respuesta mecánica, que no se mide directamente con este trazado.</p></div></div>'+waveGraphic(p.key)+
  '<div class="c1-step-actions">'+PHASES.map((x,i)=>'<button type="button" data-c1-phase="'+i+'" class="'+(state.phase===i?"selected":"")+'">'+(i+1)+'. '+x.key+'</button>').join("")+'</div><div class="c1-comment"><strong>'+p.title+'</strong><p>'+p.more+'</p></div></div>'+
- '<div class="c1-panel"><h3>Comprueba lo aprendido</h3><p>¿Qué magnitud mide directamente el ECG?</p><div class="c1-answer-grid">'+[["voltage","Diferencias de potencial eléctrico"],["mechanic","Fuerza de contracción"],["flow","Gasto cardíaco"]].map(([key,label])=>'<button type="button" data-c1-concept="'+key+'" '+(state.conceptAnswer?"disabled":"")+'>'+label+'</button>').join("")+'</div>'+
+ '<div class="c1-panel"><h3>Un breve contexto histórico</h3><p>Augustus Waller registró actividad eléctrica cardíaca humana antes de Einthoven. Willem Einthoven perfeccionó el galvanómetro de cuerda y consolidó el registro electrocardiográfico moderno; recibió el Nobel de Medicina en 1924. Lo importante aquí es comprender la medición eléctrica, no memorizar las fechas.</p></div><div class="c1-panel"><h3>Comprueba lo aprendido</h3><p>¿Qué magnitud mide directamente el ECG?</p><div class="c1-answer-grid">'+[["voltage","Diferencias de potencial eléctrico"],["mechanic","Fuerza de contracción"],["flow","Gasto cardíaco"]].map(([key,label])=>'<button type="button" data-c1-concept="'+key+'" '+(state.conceptAnswer?"disabled":"")+'>'+label+'</button>').join("")+'</div>'+
  (state.conceptAnswer?'<div class="c1-feedback '+(state.conceptAnswer==="voltage"?"good":"bad")+'" role="status"><strong>'+(state.conceptAnswer==="voltage"?"Correcto":"Revisa la diferencia")+'</strong><p>El ECG registra voltajes relativos a lo largo del tiempo. La contracción y el gasto cardíaco requieren otros métodos de valoración.</p></div><button class="btn secondary" data-c1-action="retry-concept">Volver a intentar</button>':'')+'</div>';
 }
 function wavesTool(){
  const practice=state.mode==="practice",task=WAVE_TASKS[state.waveQuestion%3];
  return title("Comprende P, PR, QRS, ST y T","Relaciona cada componente con el fenómeno eléctrico correspondiente.")+
  '<div class="c1-panel"><div class="c1-toolbar"><div class="c1-mode"><button data-c1-mode="learn" class="'+(!practice?"selected":"")+'">Aprender</button><button data-c1-mode="practice" class="'+(practice?"selected":"")+'">Practicar</button></div><span class="c1-step">'+state.waveDone.size+'/3 estructuras identificadas</span></div>'+
- '<div class="c1-wave-wrap">'+waveGraphic(practice?"none":state.wave,!practice)+'</div>'+
+ '<div class="c1-wave-wrap">'+waveGraphic(practice?"none":state.wave,!practice,practice)+'</div>'+
  (practice?'<p class="c1-question">'+task.question+'</p>':'<p class="c1-muted">Selecciona una onda para resaltar su segmento y consultar el significado.</p>')+
- '<div class="c1-wave-select">'+PHASES.map(p=>'<button type="button" data-c1-wave="'+p.key+'" class="'+(!practice&&state.wave===p.key?"selected":"")+'">'+(practice?"Señalar ":"")+(p.key==="QRS"?"QRS":"Onda "+p.key)+'</button>').join("")+'</div>'+
- (practice?'<p class="c1-muted">En modo práctica no aparecen etiquetas en el trazado ni se revela la respuesta antes de elegir.</p>':
+ '<div class="c1-wave-select">'+PHASES.map((p,i)=>'<button type="button" data-c1-wave="'+p.key+'" class="'+(!practice&&state.wave===p.key?"selected":"")+'">'+(practice?"Zona "+(i+1):p.key==="QRS"?"Complejo QRS":"Onda "+p.key)+'</button>').join("")+'</div>'+
+ (practice?'<p class="c1-muted">En modo práctica las zonas se numeran sin revelar las ondas. Puedes tocar el trazado o seleccionar una zona inferior.</p>':
  '<div class="c1-comment"><strong>'+PHASES.find(p=>p.key===state.wave).title+'</strong><p>'+PHASES.find(p=>p.key===state.wave).more+'</p></div>')+
  (state.waveAnswer?'<div class="c1-feedback '+(state.waveAnswer.ok?"good":"bad")+'" role="status"><strong>'+(state.waveAnswer.ok?"Identificación correcta":"Identificación incorrecta")+'</strong><p>'+esc(state.waveAnswer.reason)+'</p></div><button type="button" class="btn secondary" data-c1-action="'+(state.waveAnswer.ok?"next-wave":"retry-wave")+'">'+(state.waveAnswer.ok?"Siguiente componente →":"Reintentar")+'</button>':"")+
  '</div><div class="c1-panel"><h3>Otros componentes importantes</h3><div class="c1-two-grid"><div><strong>Intervalo PR</strong><p>Desde el comienzo de P al inicio del QRS. Incluye conducción auricular y auriculoventricular.</p></div><div><strong>Segmento ST</strong><p>Desde el final del QRS hasta el comienzo de T. Debe valorarse respecto a la línea isoeléctrica y el contexto.</p></div></div><p class="c1-muted">La repolarización auricular suele quedar enmascarada por la despolarización ventricular. Un QRS normal no requiere que se distingan ondas Q, R y S en todas las derivaciones.</p></div>';
@@ -137,7 +139,7 @@ function refresh(){
  const id=el.dataset.topic||root.ECGChapter1.activeTopic||"C1.0";
  el.innerHTML=(id==="C1.0"?phaseTool():id==="C1.1"?wavesTool():lawTool());
 }
-function setTopic(id){root.ECGChapter1.activeTopic=id;if(id==="C1.1"){state.waveAnswer=null;}else if(id==="C1.2"){state.potFeedback=null;}}
+function setTopic(id){const changed=root.ECGChapter1.activeTopic!==id;root.ECGChapter1.activeTopic=id;if(changed){state.mode="learn";state.waveAnswer=null;state.potFeedback=null;}}
 function evalWaves(value){
  const target=WAVE_TASKS[state.waveQuestion%3],ok=value===target.key;
  state.waveAnswer={ok,reason:target.question+" "+PHASES.find(p=>p.key===target.key).more};
@@ -168,6 +170,9 @@ if(typeof document!=="undefined"){
    if(el.dataset.c1Action==="reset-pots")state.potential={bd:0,bi:.6,pi:1.1};
   }
   refresh();
+ });
+ document.body.addEventListener("keydown",event=>{
+  if((event.key==="Enter"||event.key===" ")&&event.target.matches?.('g[data-c1-wave][role="button"]')){event.preventDefault();event.target.dispatchEvent(new MouseEvent("click",{bubbles:true}));}
  });
  document.body.addEventListener("input",event=>{
   if(!event.target.hasAttribute("data-c1-potential")||!document.querySelector("#chapter1-root"))return;
