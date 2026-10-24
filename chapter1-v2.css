@@ -167,3 +167,26 @@
  .c1v-heart-image-mode .c1v-overlay-route,
  .c1v-heart-image-mode .c1v-spot-aura{animation:none!important;transition:none!important}
 }
+
+
+/* Calibrated anatomical rendering: the bitmap now lives INSIDE the SVG.
+   All landmarks, tissue masks and paths use the identical 357 × 373 viewBox. */
+.c1v-heart-image-mode .c1v-heart.c1v-anatomy-composite{position:relative;inset:auto;display:block;width:100%;height:100%;max-width:none;margin:0;overflow:hidden;filter:none}
+.c1v-heart-image-mode .c1v-anatomy-composite > image.c1v-anatomy-photo{width:100%;height:100%;object-fit:fill}
+.c1v-heart-image-mode .c1v-tissue{opacity:0;transition:opacity .35s ease-out;pointer-events:none}
+.c1v-heart-image-mode[data-c1v-current="atria"] .c1v-tissue-atria{opacity:.9}
+.c1v-heart-image-mode[data-c1v-current="qrs"] .c1v-tissue-qrs{opacity:1}
+.c1v-heart-image-mode[data-c1v-current="t"] .c1v-tissue-t{opacity:1}
+.c1v-heart-image-mode[data-c1v-current="sa"] .c1v-overlay-atria{opacity:0}
+.c1v-heart-image-mode[data-c1v-current="atria"] .c1v-overlay-atria{opacity:1}
+.c1v-heart-image-mode[data-c1v-current="av"] .c1v-overlay-av{opacity:1}
+.c1v-heart-image-mode[data-c1v-current="his"] .c1v-overlay-his{opacity:1}
+.c1v-heart-image-mode[data-c1v-current="qrs"] .c1v-overlay-his{opacity:0}
+.c1v-heart-image-mode[data-c1v-current="t"] .c1v-overlay-his{opacity:0}
+.c1v-heart-image-mode .c1v-region-hotspot{cursor:pointer;touch-action:manipulation;outline:none}
+.c1v-heart-image-mode .c1v-region-hotspot .c1v-region-hit{pointer-events:all}
+.c1v-heart-image-mode .c1v-region-hotspot:focus-visible .c1v-region-hit{stroke:#fff4b9;stroke-width:4;stroke-dasharray:5 8}
+.c1v-heart-image-mode[data-c1v-playing="true"][data-c1v-current="qrs"] .c1v-tissue-qrs{animation:c1v-myocardium-pulse 1.2s ease-in-out infinite alternate}
+.c1v-heart-image-mode[data-c1v-playing="true"][data-c1v-current="t"] .c1v-tissue-t{animation:c1v-myocardium-pulse 1.9s ease-in-out infinite alternate}
+@keyframes c1v-myocardium-pulse{from{opacity:.35}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.c1v-heart-image-mode .c1v-tissue{animation:none!important;transition:none!important}}
