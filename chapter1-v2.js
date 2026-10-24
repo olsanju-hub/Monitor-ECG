@@ -147,7 +147,9 @@ function wavesTool(){
 function paint(){
  const container=document.querySelector("#chapter1-v2-root");if(!container)return;
  const current=container.dataset.topic;
- container.innerHTML=current==="C1.0"?stageTools():wavesTool();
+ const main=container.querySelector(".c1v-main");
+ if(main){main.innerHTML=current==="C1.0"?stageTools():wavesTool();}
+ else container.innerHTML=topicNav(current)+'<div class="c1v-main">'+(current==="C1.0"?stageTools():wavesTool())+'</div>';
 }
 function move(to){
  v.step=k(to);
@@ -212,10 +214,13 @@ document.body.addEventListener("keydown",e=>{
  }
 });
 document.addEventListener("visibilitychange",()=>{if(document.hidden){v.playing=false;stop();}});
+function topicNav(topic){
+ return '<nav class="c1v-topic-nav" aria-label="Lecciones del capítulo 1">'+[['C1.0','1 · Impulso'],['C1.1','2 · Ondas'],['C1.2','3 · Derivaciones']].map(([id,text])=>'<button type="button" data-topic="'+id+'" class="'+(topic===id?'active':'')+'" aria-current="'+(topic===id?'step':'false')+'">'+text+'</button>').join('')+'</nav>';
+}
 const bridge={...legacy};
 legacy.render=function(topic){
  if(topic==="C1.0"||topic==="C1.1"){
-  return '<section id="chapter1-v2-root" class="c1v-module" data-topic="'+topic+'"><nav class="c1v-topic-nav" aria-label="Lecciones del capítulo 1">'+[['C1.0','1 · Impulso'],['C1.1','2 · Ondas'],['C1.2','3 · Derivaciones']].map(([id,text])=>'<button type="button" data-topic="'+id+'" class="'+(topic===id?'active':'')+'" aria-current="'+(topic===id?'step':'false')+'">'+text+'</button>').join('')+'</nav>'+(topic==="C1.0"?stageTools():wavesTool())+'</section>';
+  return '<section id="chapter1-v2-root" class="c1v-module" data-topic="'+topic+'">'+topicNav(topic)+'<div class="c1v-main">'+(topic==="C1.0"?stageTools():wavesTool())+'</div></section>';
  }
  return oldRender(topic);
 };
