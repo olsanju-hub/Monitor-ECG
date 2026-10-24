@@ -81,6 +81,28 @@ async function run(){
    await page.locator('[data-teach-calc="qtc"]').click();
    await page.locator('#teachQTResult strong').waitFor();
    await checkViewport(page,"didactic calculators "+width,width);
+   // Chapter 1 accepted design: three distinct interactive lessons.
+   await page.locator('[data-page="home"]:visible').first().click();
+   await page.locator('[data-chapter="1"]').click();
+   await page.locator('#chapter1-root').waitFor();
+   await checkViewport(page,"fundamentals electrical "+width,width);
+   await page.locator('[data-c1-phase="1"]').click();
+   await page.locator('[data-c1-concept="voltage"]').click();
+   await page.locator('[data-topic="C1.1"]').first().click();
+   await page.locator('#chapter1-root').waitFor();
+   await checkViewport(page,"fundamentals waves "+width,width);
+   await page.locator('[data-c1-mode="practice"]').click();
+   await page.locator('.c1-wave-select [data-c1-wave="P"]').click();
+   await page.locator('.c1-feedback.good').waitFor();
+   await page.locator('[data-topic="C1.2"]').first().click();
+   await page.locator('#chapter1-root').waitFor();
+   await checkViewport(page,"fundamentals Einthoven "+width,width);
+   await page.locator('[data-c1-potential="bi"]').evaluate(el=>{el.value="0.4";el.dispatchEvent(new Event("input",{bubbles:true}))});
+   await page.locator('[data-c1-lead="di"]').waitFor();
+   await page.locator('[data-c1-mode="practice"]').click();
+   await page.locator('[data-c1-pot-answer="0.5"]').click();
+   await page.locator('.c1-feedback.good').waitFor();
+   await checkViewport(page,"fundamentals skills "+width,width);
    console.log("PASS responsive viewport "+width+"px");
    await context.close();
   }
