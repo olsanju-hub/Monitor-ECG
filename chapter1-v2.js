@@ -105,13 +105,13 @@ function waveCard(section){
  ST:'M388 129H455',
  T:'M455 129H483C510 129 519 84 548 82C576 81 585 129 613 129H668'
  };
- const ranges={P:[83,155],PR:[154,284],QRS:[284,388],ST:[388,456],T:[484,618]};
+ const ranges={P:[83,155],PR:[83,284],QRS:[284,388],ST:[388,456],T:[484,618]};
  const focus=Object.keys(ranges).find(key=>key===chosen)||"none";
  return '<div class="c1v-trace-card" aria-label="ECG sintético ilustrativo sincronizado"><svg viewBox="0 0 686 210" class="c1v-trace" role="img" aria-label="Trazado didáctico con P, PR, QRS, ST y T; no es un registro clínico">'+
  '<defs><pattern id="c1v-paper-small" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0H0V10" fill="none" stroke="#f2e1e4" stroke-width=".75"/></pattern><pattern id="c1v-paper-large" width="50" height="50" patternUnits="userSpaceOnUse"><rect width="50" height="50" fill="url(#c1v-paper-small)"/><path d="M50 0H0V50" stroke="#e3c1c9" stroke-width="1" fill="none"/></pattern></defs>'+
  '<rect width="686" height="210" rx="14" fill="#fffbfc"/><rect width="686" height="210" rx="14" fill="url(#c1v-paper-large)"/>'+
  (focus!=="none"?'<rect x="'+ranges[focus][0]+'" y="11" width="'+(ranges[focus][1]-ranges[focus][0])+'" height="159" rx="9" fill="#d4ecec" opacity=".68"/>':'')+
- Object.entries(segments).map(([id,d])=>'<path d="'+d+'" stroke="'+(chosen===id?"#058496":"#294f64")+'" stroke-width="'+(chosen===id?5:3.2)+'" stroke-linecap="round" stroke-linejoin="round" fill="none"/>').join("")+
+ Object.entries(segments).map(([id,d])=>'<path d="'+d+'" stroke="'+(chosen===id||(chosen==="PR"&&id==="P")?"#058496":"#294f64")+'" stroke-width="'+(chosen===id||(chosen==="PR"&&id==="P")?5:3.2)+'" stroke-linecap="round" stroke-linejoin="round" fill="none"/>').join("")+
  '<text x="20" y="194" fill="#607785" font-size="15">Esquema de enseñanza · no utilizar para diagnóstico</text></svg></div>';
 }
 function stageTools(){
