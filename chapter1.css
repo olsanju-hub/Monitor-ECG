@@ -117,3 +117,12 @@
  .c1-selected-detail{padding:12px}
  .c1-law-result p{font-size:.88rem}
 }
+
+/* Intro copy now separates definition, pole identification and calculation. */
+.c1-clear-intro h3{font-size:clamp(1.1rem,2.4vw,1.35rem);color:#173f53;line-height:1.35;margin:12px 0 8px}
+.c1-clear-intro>p{font-size:.97rem;line-height:1.65;color:#496777;margin:0 0 16px}
+.c1-intro-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:16px}
+.c1-intro-steps>div{display:grid;align-content:start;gap:6px;background:#f0f7f6;border:1px solid #d9e9e5;border-radius:11px;padding:12px 14px;min-width:0}
+.c1-intro-steps strong{font-size:.87rem;line-height:1.4;color:#155266}
+.c1-intro-steps span{font-size:.82rem;line-height:1.45;color:#506a78}
+@media(max-width:850px){.c1-intro-steps{grid-template-columns:1fr}}
