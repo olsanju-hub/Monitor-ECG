@@ -61,6 +61,9 @@ async function run(){
    await page.locator('[data-chapter="1"]').first().click();
    await page.locator('#chapter1-v2-root').waitFor();
    assert.equal(await page.locator(".c1v-heart").count(),1,"New anatomical model replaces the old schematic");
+   // Image loading is async even after the containing section appears. Wait for actual decode:
+   // checking img.complete synchronously here caused a false negative on a cold CI cache.
+   await page.locator(".c1v-anatomy-photo").evaluate(img=>img.decode());
    const anatomy=await page.locator(".c1v-anatomy-photo").evaluate(img=>{
      const overlay=document.querySelector(".c1v-anatomy-overlay");
      const a=img.getBoundingClientRect(),b=overlay?.getBoundingClientRect();
