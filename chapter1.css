@@ -1,0 +1,64 @@
+/* Chapter 1 — approved ECG fundamentals. Professional, mobile-first didactic tools. */
+.c1-module{width:100%;max-width:100%;min-width:0;--c1-ink:#174458;--c1-accent:#087b8c;--c1-line:#d7e6e5}
+.c1-title{margin:8px 0 18px}
+.c1-title h2{font-size:clamp(1.25rem,2.6vw,1.75rem);line-height:1.28;color:var(--navy);margin:4px 0 8px}
+.c1-title p:last-child{font-size:.94rem;line-height:1.55;color:#4a6874;margin:0}
+.c1-module .c1-panel{min-width:0;width:100%;background:#fff;border:1px solid var(--c1-line);border-radius:16px;padding:clamp(14px,2vw,24px);margin:15px 0}
+.c1-module .c1-panel-hero{background:linear-gradient(155deg,#fbfdfc,#f5f9f8)}
+.c1-module h3{color:var(--navy);font-size:1.03rem;margin:0 0 10px}
+.c1-module p{line-height:1.58}
+.c1-module .c1-muted{font-size:.83rem;color:#55717b;line-height:1.5}
+.c1-mini-heart{max-width:290px;margin:auto;min-width:0}
+.c1-mini-heart svg{width:100%;min-width:0;max-width:100%;height:auto}
+.c1-mini-heart .atlas-hotspot,.c1-mini-heart .atlas-chamber-labels{pointer-events:none}
+.c1-physiology{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:center;gap:18px}
+.c1-physiology h3{font-size:1.1rem}
+.c1-step{font-size:.73rem;letter-spacing:.05em;text-transform:uppercase;font-weight:800;color:#307783}
+.c1-wave-svg{width:100%;max-width:620px;height:auto;display:block;margin:12px auto}
+.c1-wave-wrap{border:1px solid #e8d6db;border-radius:12px;overflow:hidden;background:#fffbfa}
+.c1-step-actions,.c1-wave-select{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:13px 0}
+.c1-step-actions button,.c1-wave-select button{border:1px solid #b7d4d8;background:#f3faf9;border-radius:11px;color:var(--navy);min-height:48px;padding:10px 8px;font-weight:750;font-size:.85rem}
+.c1-step-actions button.selected,.c1-wave-select button.selected{color:#fff;background:#0a6071;border-color:#0a6071}
+.c1-module button:focus-visible,.c1-module input:focus-visible{outline:3px solid #eca93c;outline-offset:2px}
+.c1-comment{background:#eff7f5;border-radius:11px;border-left:4px solid #288c94;padding:14px 16px;margin:16px 0 4px;font-size:.88rem}
+.c1-comment strong{color:var(--navy)}
+.c1-comment p{margin:7px 0 0}
+.c1-mode{display:inline-flex;background:#ebf4f3;padding:4px;gap:4px;border-radius:12px;margin-bottom:11px}
+.c1-mode button{min-width:92px;min-height:44px;border:0;border-radius:9px;background:transparent;color:#395b67;font-weight:750}
+.c1-mode button.selected{background:#fff;color:#08596a;box-shadow:0 2px 6px #14494d15}
+.c1-toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px}
+.c1-question{background:#eef7f6;border-left:4px solid #268b92;padding:12px 14px;border-radius:8px;font-weight:700;color:var(--navy)}
+.c1-answer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.c1-answer-grid button{background:#f6fbfa;border:1px solid #c4dcdf;color:var(--navy);border-radius:10px;min-height:48px;padding:12px 10px;font-size:.84rem;font-weight:700;text-align:left}
+.c1-answer-grid button:disabled{opacity:.72}
+.c1-feedback{border-radius:11px;padding:12px 14px;border:1px solid transparent;margin:12px 0}
+.c1-feedback.good{color:#1c6244;background:#ecf7f0;border-color:#b4ddc5}
+.c1-feedback.bad{color:#893f50;background:#fff3f4;border-color:#edcbd0}
+.c1-feedback p{font-size:.84rem;margin:7px 0 0}
+.c1-two-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.c1-two-grid>div{min-width:0}
+.c1-two-grid p{font-size:.85rem;margin:7px 0 0}
+.c1-einthoven-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center}
+.c1-triangle{display:block;width:100%;max-width:480px;height:auto;margin:auto}
+.c1-lead-def{display:grid;grid-template-columns:48px 1fr;gap:2px 7px;align-items:center;padding:10px 0;border-bottom:1px solid #e0eae9}
+.c1-lead-def strong{font-size:.98rem}
+.c1-lead-def span{font-size:.84rem;font-weight:750;color:#294a59}
+.c1-lead-def small{grid-column:2;font-size:.73rem;line-height:1.35;color:#607781}
+.c1-color-di{color:#14788d}
+.c1-color-dii{color:#ad7929}
+.c1-color-diii{color:#806ca2}
+.c1-parameter-grid{padding:16px;background:#f7faf9;border:1px solid #dbe8e7;border-radius:12px;margin:17px 0}
+.c1-parameter-grid h3{margin-bottom:5px}
+.c1-range-label{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:7px;margin:11px 0;color:#365665;font-size:.84rem}
+.c1-range-label strong{font-variant-numeric:tabular-nums;color:#0c6370}
+.c1-range-label input{grid-column:1/-1;width:100%;min-height:44px;accent-color:#187e89}
+.c1-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:13px 0}
+.c1-results>div{display:flex;flex-direction:column;align-items:center;gap:3px;background:#ecf7f5;border:1px solid #d0e5e2;border-radius:11px;padding:12px 5px}
+.c1-results span{font-size:.7rem;color:#4d7179;text-align:center}
+.c1-results strong{font-size:clamp(1.05rem,2.5vw,1.42rem);font-variant-numeric:tabular-nums;color:var(--navy)}
+.c1-results small{font-size:.67rem;color:#71858c}
+.c1-practice-box{border-top:1px solid #d7e6e5;padding-top:16px;margin-top:17px}
+.c1-practice-box button[disabled]{opacity:.65}
+.c1-module .btn{min-height:44px}
+@media(max-width:860px){.c1-physiology,.c1-einthoven-layout{grid-template-columns:minmax(0,1fr)}.c1-mini-heart{max-width:360px}}
+@media(max-width:430px){.c1-module .c1-panel{padding:12px}.c1-two-grid{grid-template-columns:minmax(0,1fr)}.c1-physiology{gap:4px}.c1-mini-heart{max-width:330px}.c1-step-actions button,.c1-wave-select button{font-size:.76rem;padding:8px 4px}.c1-answer-grid{grid-template-columns:minmax(0,1fr)}.c1-results{gap:5px}.c1-results>div{padding:10px 3px}.c1-results span{font-size:.65rem}.c1-lead-def{grid-template-columns:48px 1fr}.c1-panel-hero .c1-comment{margin-top:12px}}
