@@ -40,61 +40,29 @@ function icon(name){return ({
  }[name]||"")}
 function pictogram(n){return '<svg class="c1v-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">'+icon(n)+'</svg>'}
 function heart(){
- const p=steps[v.step],active=p.link;
- const glow=(id,x,y)=>{
-  const selected=(active===id||(id==="atria"&&active==="sa"))?" on":"";
-  return '<g class="c1v-signal'+selected+'" data-c1v-spot="'+id+'" role="button" tabindex="0" aria-label="Explorar '+({sa:"nodo sinoauricular",atria:"activación auricular",av:"nodo auriculoventricular",his:"haz de His y fibras de Purkinje",qrs:"activación ventricular",t:"repolarización ventricular"}[id])+'"><circle class="c1v-spot-hit" cx="'+x+'" cy="'+y+'" r="39" fill="transparent"/><circle class="c1v-spot-aura" cx="'+x+'" cy="'+y+'" r="22"/><circle class="c1v-spot-core" cx="'+x+'" cy="'+y+'" r="8"/></g>';
- };
- return '<div class="c1v-heart-canvas" data-c1v-current="'+active+'" data-c1v-playing="'+v.playing+'" aria-label="Modelo anatómico original en corte con conducción eléctrica resaltada">'+
- '<svg class="c1v-heart" viewBox="0 0 520 590" role="img" aria-label="Ilustración anatómica docente de aurículas y ventrículos, grandes vasos y sistema de conducción. No representa tiempos fisiológicos a escala.">'+
- '<defs>'+
- '<radialGradient id="c1v-halo"><stop stop-color="#f1f9f6"/><stop offset="1" stop-color="#f7fbfa"/></radialGradient>'+
- '<linearGradient id="c1v-wall" x1="0" y1="0" x2=".95" y2="1"><stop stop-color="#f6b7a7"/><stop offset=".4" stop-color="#bc5b61"/><stop offset=".75" stop-color="#a04351"/><stop offset="1" stop-color="#692e44"/></linearGradient>'+
- '<linearGradient id="c1v-muscle" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7ad9b"/><stop offset=".4" stop-color="#b74b59"/><stop offset=".8" stop-color="#802c47"/><stop offset="1" stop-color="#54223a"/></linearGradient>'+
- '<linearGradient id="c1v-cavity" x1="0" y1="0" x2=".95" y2="1"><stop stop-color="#552d44"/><stop offset=".5" stop-color="#8b3a51"/><stop offset="1" stop-color="#b45465"/></linearGradient>'+
- '<linearGradient id="c1v-vein" x1="0" x2="1"><stop stop-color="#123f66"/><stop offset=".4" stop-color="#358bb2"/><stop offset="1" stop-color="#143a62"/></linearGradient>'+
- '<linearGradient id="c1v-artery" x1="0" x2="1"><stop stop-color="#7b344c"/><stop offset=".5" stop-color="#ec8d7b"/><stop offset="1" stop-color="#953550"/></linearGradient>'+
- '<linearGradient id="c1v-septum" x1="0" x2="1"><stop stop-color="#e99183"/><stop offset=".5" stop-color="#f4c3a5"/><stop offset="1" stop-color="#9c4d5b"/></linearGradient>'+
- '<filter id="c1v-depth" x="-30%" y="-30%" width="170%" height="170%"><feGaussianBlur stdDeviation="10"/></filter>'+
- '<filter id="c1v-pulse" x="-170%" y="-170%" width="450%" height="450%"><feGaussianBlur stdDeviation="5"/></filter>'+
- '<clipPath id="c1v-inside"><path d="M90 205C94 155 139 116 209 128C260 123 273 143 291 153C347 114 412 145 441 199C468 244 462 329 428 398C390 476 315 533 261 564C216 549 115 495 80 420C36 341 51 257 90 205Z"/></clipPath>'+
- '</defs>'+
- '<rect x="0" y="0" width="520" height="590" rx="20" fill="url(#c1v-halo)"/>'+
- '<ellipse cx="270" cy="355" rx="193" ry="206" fill="#193c4b" opacity=".10" filter="url(#c1v-depth)"/>'+
- /* vessels behind chambers */
- '<path d="M155 185L148 18Q149 1 164 2Q180 3 181 18L180 183" fill="url(#c1v-vein)" stroke="#1e5e83" stroke-width="5"/>'+
- '<path d="M363 190C370 115 369 42 361 16C358 5 367 1 377 3L398 13C411 33 402 93 403 172" fill="url(#c1v-artery)" stroke="#9f4b56" stroke-width="5"/>'+
- '<path d="M291 169C279 90 292 42 317 45C365 50 347 106 350 163" fill="none" stroke="#246a8c" stroke-width="48" stroke-linecap="round"/>'+
- '<path d="M291 169C279 90 292 42 317 45C365 50 347 106 350 163" fill="none" stroke="#76b9c7" stroke-width="14" stroke-linecap="round" opacity=".7"/>'+
- '<path d="M394 217C459 186 484 177 489 148" fill="none" stroke="#3d9fb0" stroke-width="32" stroke-linecap="round"/>'+
- /* muscle contour */
- '<path d="M90 205C94 155 139 116 209 128C260 123 273 143 291 153C347 114 412 145 441 199C468 244 462 329 428 398C390 476 315 533 261 564C216 549 115 495 80 420C36 341 51 257 90 205Z" fill="url(#c1v-wall)" stroke="#823e55" stroke-width="7"/>'+
- '<g clip-path="url(#c1v-inside)">'+
- '<path d="M100 195C94 170 160 147 203 170C231 186 245 226 240 285C225 310 203 315 166 303C114 278 91 246 100 195Z" fill="url(#c1v-cavity)" stroke="#f9b9a1" stroke-width="12"/>'+
- '<path d="M308 195C329 165 366 160 397 186C431 212 429 262 400 291C371 316 317 309 288 280C276 256 286 224 308 195Z" fill="url(#c1v-cavity)" stroke="#f1b4a4" stroke-width="13"/>'+
- '<path d="M116 320C152 294 198 313 243 349C257 397 269 466 250 531C206 517 149 474 115 420C97 381 94 343 116 320Z" fill="url(#c1v-muscle)" stroke="#fac0a2" stroke-width="15"/>'+
- '<path d="M305 323C348 296 410 316 430 348C445 403 364 503 286 547C269 480 268 372 305 323Z" fill="url(#c1v-muscle)" stroke="#ffcab0" stroke-width="17"/>'+
- '<path d="M246 311C262 330 274 356 280 401L275 548" fill="none" stroke="url(#c1v-septum)" stroke-width="20" stroke-linecap="round"/>'+
- '<path d="M240 308C249 321 258 331 271 337C285 329 291 315 306 309" fill="none" stroke="#ffe1bf" stroke-width="12" stroke-linecap="round"/>'+
- '<path d="M235 320L251 362M308 325L285 362" stroke="#edc5ad" stroke-width="6" opacity=".92"/>'+
- /* trabeculae and textures */
- '<g fill="none" stroke="#f3a08d" stroke-width="4" opacity=".6">'+
- '<path d="M126 366Q176 359 235 420M126 389Q181 389 239 457M143 432Q184 418 226 477M315 381Q374 355 421 383M302 415Q358 401 408 418M302 454Q345 445 375 468"/>'+
- '</g><g stroke="#ffd1b3" stroke-width="3" opacity=".58" fill="none">'+
- '<path d="M142 224Q166 188 208 223M327 236Q358 205 387 241M171 334Q201 344 235 393M321 356Q359 335 408 364"/>'+
- '</g></g>'+
- '<path d="M90 205C94 155 139 116 209 128C260 123 273 143 291 153C347 114 412 145 441 199" fill="none" stroke="#ffd8b8" stroke-width="3" opacity=".8"/>'+
- /* specialized conduction */
- '<g class="c1v-traces" fill="none" stroke-linecap="round" stroke-linejoin="round">'+
- '<path class="c1v-route c1v-route-atria" d="M139 192Q177 185 218 216L249 283M139 192Q184 147 257 178Q314 196 356 223" />'+
- '<path class="c1v-route c1v-route-av" d="M249 282L267 314L273 351" />'+
- '<path class="c1v-route c1v-route-vent" d="M273 350Q256 383 224 407L157 485M273 350Q294 374 325 410L381 482M224 407L203 456M325 410L335 466M243 390L235 470M305 394L305 485" />'+
- '<path class="c1v-route c1v-route-fine" d="M157 485l-28-30M157 485l24-44M182 447l-14-53M203 456l-36 20M224 407l-41-29M381 482l31-54M381 482l-32-30M345 446l39-22M335 466l-41 25M305 485l31-16" />'+
- '</g>'+
- '<g class="c1v-atrial-glow"><path d="M109 204Q119 155 186 164Q226 190 230 263" fill="none" stroke="#fff0a6" stroke-width="7" stroke-linecap="round"/><path d="M319 198Q369 177 395 217L406 262" fill="none" stroke="#fff0a6" stroke-width="7" stroke-linecap="round"/></g>'+
- '<g class="c1v-ventricle-glow"><path d="M134 354Q183 325 236 418L241 505M322 354Q371 328 408 368Q370 468 298 523" fill="none" stroke="#ffe18a" stroke-width="9" stroke-linecap="round"/></g>'+
- glow("sa",139,192)+glow("atria",184,235)+glow("av",249,283)+glow("his",271,363)+glow("qrs",351,417)+glow("t",348,475)+
- '</svg><div class="c1v-anatomy-foot">Modelo anatómico ilustrativo · Selecciona una zona o utiliza las fases</div></div>';
+ const active=steps[v.step].link;
+ const anatomyLabels={sa:"nodo sinoauricular",atria:"activación auricular",av:"nodo auriculoventricular",his:"His, ramas y Purkinje",qrs:"activación ventricular",t:"repolarización ventricular"};
+ const spots=[["sa",108,126],["atria",236,156],["av",152,191],["his",178,236],["qrs",232,274],["t",282,325]];
+ const marks=spots.map(([id,x,y])=>{
+  const on=id===active?" on":"";
+  return '<g role="button" tabindex="0" class="c1v-signal'+on+'" data-c1v-spot="'+id+'" aria-label="Explorar '+anatomyLabels[id]+'">'+
+    '<circle cx="'+x+'" cy="'+y+'" r="23" class="c1v-spot-hit" fill="transparent"/>'+
+    '<circle cx="'+x+'" cy="'+y+'" r="17" class="c1v-spot-aura"/>'+
+    '<circle cx="'+x+'" cy="'+y+'" r="5.5" class="c1v-spot-core"/></g>';
+ }).join("");
+ return '<div class="c1v-heart-canvas c1v-heart-image-mode" data-c1v-current="'+active+'" data-c1v-playing="'+v.playing+'" aria-label="Imagen anatómica con ruta eléctrica interactiva">'+
+ '<div class="c1v-image-stack">'+
+ '<img class="c1v-anatomy-photo" src="assets/chapter1/heart-anatomy.webp" width="357" height="373" loading="eager" decoding="async" alt="Corazón humano en corte anatómico semirrealista; vasos, aurículas, ventrículos y vías de conducción representadas con finalidad docente.">'+
+ '<svg class="c1v-heart c1v-anatomy-overlay" viewBox="0 0 357 373" role="group" aria-label="Capa táctil y animada de conducción eléctrica, alineada sobre la ilustración anatómica" preserveAspectRatio="xMidYMid meet">'+
+ '<defs><filter id="c1v-new-glow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="5"/></filter></defs>'+
+ '<g fill="none" stroke-linecap="round" stroke-linejoin="round" class="c1v-overlay-routes">'+
+ '<path class="c1v-overlay-route c1v-overlay-atria" d="M108 126C122 138 135 161 152 191M108 126C150 112 184 126 236 156"/>'+
+ '<path class="c1v-overlay-route c1v-overlay-av" d="M152 191Q161 214 178 236"/>'+
+ '<path class="c1v-overlay-route c1v-overlay-his" d="M178 236Q159 266 132 298M178 236Q205 257 229 283L282 325M151 267L110 304M216 281L252 317"/>'+
+ '<path class="c1v-overlay-route c1v-overlay-ventricle" d="M124 250Q138 304 173 329M221 233Q247 276 282 325"/>'+
+ '<path class="c1v-overlay-route c1v-overlay-recovery" d="M143 313Q167 270 197 252M285 313Q278 264 239 239"/>'+
+ '</g>'+marks+'</svg></div>'+
+ '<div class="c1v-anatomy-foot">Ilustración anatómica semirrealista · Actividad eléctrica resaltada por fases · Toca una zona para explorarla</div></div>';
 }
 function waveCard(section){
  const chosen=section||"none";
