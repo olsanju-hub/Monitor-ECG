@@ -2,22 +2,27 @@
    El monitor legado permanece accesible como simulación didáctica. */
 (function(){
 "use strict";
-const chapters=window.ECG_CURRICULUM,bank=window.ECG_QUESTIONS;
+// Release only reviewed chapters; preserve source material and historical local progress.
+const APPROVED_CHAPTERS=new Set([1]);
+const chapters=window.ECG_CURRICULUM.filter(c=>APPROVED_CHAPTERS.has(c.number));
+const bank=window.ECG_QUESTIONS.filter(q=>APPROVED_CHAPTERS.has(q.chapter));
+const questionIds=new Set(bank.map(q=>q.id));
 const KEY="ecg-academia-v1";
 const empty=()=>({version:1,visited:{},done:{},attempts:[],practice:{},visualHistory:[],pretest:false,activeTopic:"C1.0",activeChapter:1,seconds:0,started:Date.now(),diagnosticScore:null,history:[]});
 let saved;try{saved=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){saved=null}
 let S=saved&&saved.version===1?Object.assign(empty(),saved):empty();
+if(!chapters.some(c=>c.number===S.activeChapter)||!chapters.some(c=>c.topics.some(t=>t.id===S.activeTopic))){S.activeChapter=1;S.activeTopic="C1.0";}
 let page="home",quiz=null,measure=[],vectorAngle=55,selectedElectrode="V1",recentFeedback="",placementMode=false,placementIndex=0,placementFeedback="";
 const $=id=>document.getElementById(id);
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){console.warn("No se pudo guardar progreso",e)}};
 const esc=str=>String(str).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
-const chapter=n=>chapters[n-1];
+const chapter=n=>chapters.find(c=>c.number===n);
 const topics=chapters.flatMap(c=>c.topics);
 const getTopic=id=>topics.find(t=>t.id===id)||topics[0];
 const fmtMin=min=>min>=60?Math.floor(min/60)+" h "+Math.round(min%60)+" min":Math.round(min)+" min";
 const countDone=()=>topics.filter(t=>S.done[t.id]).length;
 const visitedChapters=()=>new Set(Object.keys(S.visited).map(id=>getTopic(id).chapter));
-const attemptsFor=n=>S.attempts.filter(a=>a.chapter===n&&a.mode!=="diagnostic");
+const attemptsFor=n=>S.attempts.filter(a=>a.chapter===n&&a.mode!=="diagnostic"&&questionIds.has(a.id));
 function chapterAccuracy(n){const a=attemptsFor(n).slice(-60);return a.length?Math.round(100*a.filter(x=>x.ok).length/a.length):null}
 function visualMastery(n){const map={1:["fundamentals",3],2:["conduction",6],3:["vectors",6],5:["placement",6],6:["measurement",4]};if(!map[n])return !!S.practice[n];const [kind,required]=map[n];return new Set((S.visualHistory||[]).filter(x=>x.kind===kind&&x.ok).map(x=>x.taskId)).size>=required}
 function mastery(n){const c=chapter(n),done=c.topics.every(t=>S.done[t.id]),a=chapterAccuracy(n);return done&&a!==null&&a>=(n===1?80:85)&&(n!==1||attemptsFor(1).length>=10)&&(![1,2,3,5,6,7,8,9].includes(n)||visualMastery(n))}
@@ -49,21 +54,17 @@ function render(){
  save();
 }
 function home(){
- const e=estimate(),pct=Math.round(100*e.completed/e.total),last=getTopic(S.activeTopic);
- return '<section class="hero"><div class="hero-copy"><p class="eyebrow">APRENDIZAJE ELECTROCARDIOGRÁFICO · OFFLINE FIRST</p><h1>Comprende el trazado.<br><em>Reconoce el patrón.</em></h1><p>Estudia los diez capítulos del libro, entrena con preguntas acumulativas y analiza ondas en un monitor interactivo.</p><div class="action-row"><button class="btn primary" data-action="'+(S.pretest?"continue":"diagnostic")+'">'+(S.pretest?"Continuar estudio":"Iniciar prueba diagnóstica")+' →</button><button class="btn secondary" data-page="monitor">Abrir monitor</button></div></div><div class="hero-wave">'+waveSvg("hero-wave-svg")+'<div class="wave-caption">ECG · señal ilustrativa en DII</div></div></section>'+
- '<section class="metrics"><article class="metric">'+icon("book")+'<span>Microlecciones</span><strong>'+e.completed+' <small>/ '+e.total+'</small></strong></article><article class="metric">'+icon("clock")+'<span>Estimación pendiente</span><strong>'+fmtMin(e.remaining)+'</strong></article><article class="metric">'+icon("activity")+'<span>Tiempo activo</span><strong>'+formatTime(S.seconds)+'</strong></article><article class="metric">'+icon("award")+'<span>Capítulos dominados</span><strong>'+chapters.filter(c=>mastery(c.number)).length+' <small>/ 10</small></strong></article></section>'+
- '<section class="two-col"><article class="surface"><div class="row-between"><div><p class="eyebrow">TU RUTA</p><h2>Aprendizaje en un día</h2></div><span class="pill">'+pct+' % recorrido</span></div><div class="progress-track"><div class="progress-fill" data-progress="'+pct+'"></div></div><p class="subtle">Tiempo estimado según el currículo pendiente, ejercicios y descansos. Se actualiza con tu avance, no asegura dominio en 24 h.</p><button class="text-link" data-page="route">Ver itinerario completo →</button></article><article class="surface"><p class="eyebrow">PRÓXIMO PASO</p><h2>'+esc(last.title)+'</h2><p>'+esc(last.explanation)+'</p><div class="action-row"><button class="btn primary" data-action="continue">Abrir lección</button><button class="btn secondary" data-action="cumulative">Repaso acumulativo</button></div></article></section>'+
- '<section class="section-gap"><div class="row-between"><h2>Capítulos del libro</h2><button class="text-link" data-page="route">Explorar todos →</button></div><div class="chapter-grid">'+chapters.map(c=>chapterCard(c)).join("")+'</div></section>';
+ const c=chapters[0],done=c.topics.filter(t=>S.done[t.id]).length;
+ return '<section class="hero"><div class="hero-copy"><p class="eyebrow">APRENDER ELECTROCARDIOGRAFÍA</p><h1>Comprende el trazado.<br><em>Reconoce el patrón.</em></h1><p>Aprende con un capítulo revisado cada vez: explicaciones, herramientas interactivas y práctica.</p><div class="action-row"><button class="btn primary" data-chapter="1">Abrir capítulo 1 →</button><button class="btn secondary" data-page="monitor">Monitor ECG</button></div></div><div class="hero-wave">'+waveSvg("hero-wave-svg")+'<div class="wave-caption">ECG · señal ilustrativa en DII</div></div></section>'+
+ '<section class="section-gap"><div class="row-between"><h2>Capítulo disponible</h2><span class="pill neutral">'+done+'/'+c.topics.length+' lecciones</span></div><div class="chapter-grid">'+chapterCard(c)+'</div></section>';
 }
 function chapterCard(c){
  const n=c.number,done=c.topics.filter(t=>S.done[t.id]).length,pct=Math.round(done/c.topics.length*100);
  return '<button class="chapter-card" data-chapter="'+n+'"><span class="chapter-no">'+String(n).padStart(2,"0")+'</span><strong>'+esc(c.title)+'</strong><span class="muted">'+c.topics.length+' conceptos · '+statusFor(n)+'</span><div class="progress-track small"><div class="progress-fill" data-progress="'+pct+'"></div></div></button>';
 }
 function route(){
- const e=estimate();
- return heading("RUTA DE ESTUDIO · SEGÚN EL LIBRO","Diez capítulos, ningún atajo","Orden curricular completo con navegación libre. Cada apartado conserva su referencia al capítulo original.")+
- '<div class="surface route-top"><strong>Plan personal</strong><p>'+e.total+' microlecciones · '+fmtMin(e.remaining)+' estimados pendientes (incluye aproximadamente '+fmtMin(e.review)+' de práctica y '+fmtMin(e.breaks)+' de descansos).</p><button class="btn primary" data-action="'+(S.pretest?"continue":"diagnostic")+'">'+(S.pretest?"Seguir aprendiendo":"Realizar diagnóstico inicial")+'</button></div>'+
- chapters.map(c=>'<details class="outline surface" '+(S.activeChapter===c.number?'open':'')+'><summary><span class="chapter-no">'+String(c.number).padStart(2,"0")+'</span><span><strong>'+esc(c.title)+'</strong><small>'+c.topics.filter(t=>S.done[t.id]).length+'/'+c.topics.length+' estudiados · '+statusFor(c.number)+'</small></span><span class="chevron">⌄</span></summary><div class="outline-items">'+c.topics.map((t,i)=>'<button class="topic-row" data-topic="'+t.id+'"><span class="topic-index">'+(i+1)+'.</span><span>'+esc(t.title)+'</span><span class="topic-status">'+(S.done[t.id]?"✓":"→")+'</span></button>').join("")+'<button class="text-link outline-exam" data-test-chapter="'+c.number+'">Evaluación del capítulo →</button></div></details>').join("");
+ return heading("TEMARIO","Capítulos revisados","Accede únicamente a contenidos y ejercicios aprobados.")+
+ chapters.map(c=>'<details class="outline surface" open><summary><span class="chapter-no">'+String(c.number).padStart(2,"0")+'</span><span><strong>'+esc(c.title)+'</strong><small>'+c.topics.filter(t=>S.done[t.id]).length+'/'+c.topics.length+' estudiados · '+statusFor(c.number)+'</small></span><span class="chevron">⌄</span></summary><div class="outline-items">'+c.topics.map((t,i)=>'<button class="topic-row" data-topic="'+t.id+'"><span class="topic-index">'+(i+1)+'.</span><span>'+esc(t.title)+'</span><span class="topic-status">'+(S.done[t.id]?"✓":"→")+'</span></button>').join("")+'<button class="text-link outline-exam" data-test-chapter="'+c.number+'">Evaluación del capítulo →</button></div></details>').join("");
 }
 function learn(){
  const t=getTopic(S.activeTopic),c=chapter(t.chapter),index=c.topics.findIndex(x=>x.id===t.id),globalIdx=topics.findIndex(x=>x.id===t.id);
@@ -81,18 +82,11 @@ function learn(){
  '<aside class="lesson-aside"><div class="surface sticky-box"><p class="eyebrow">EN ESTE CAPÍTULO</p><h3>'+esc(c.title)+'</h3>'+c.topics.map(x=>'<button class="side-topic '+(x.id===t.id?'active':'')+'" data-topic="'+x.id+'"><span>'+esc(x.title)+'</span><span>'+(S.done[x.id]?'✓':'')+'</span></button>').join("")+'<button class="btn secondary full" data-test-chapter="'+c.number+'">Test del capítulo</button></div></aside></div>';
 }
 function practice(){
- const labs=[
- ["conduction","Sistema de conducción","Identifica estructuras, conecta el impulso con las ondas P, PR y QRS.","heart"],
- ["vectors","Vectores eléctricos","Predice la polaridad en las derivaciones frontales.","activity"],
- ["placement","Colocación V1–V6","Sitúa los electrodos sin etiquetas y corrige errores anatómicos.","heart"],
- ["measurement","Mediciones ECG","Mide RR, PR, QRS y QT con cursores táctiles.","clock"]
- ];
- return heading("ENTRENAMIENTO","Practica hasta comprender","Las imágenes enseñan y evalúan habilidades concretas: misma funcionalidad en móvil y ordenador.")+
- '<div class="practice-grid">'+labs.map(([type,title,desc,ico])=>'<article class="surface option-card"><span class="large-icon">'+icon(ico)+'</span><h2>'+esc(title)+'</h2><p>'+esc(desc)+'</p><button class="btn primary" data-action="lab-'+type+'">Practicar</button></article>').join("")+
- '<article class="surface option-card"><span class="large-icon">'+icon("book")+'</span><h2>Test por capítulo</h2><p>Preguntas y corrección razonada.</p><label for="chapterTest" class="small-label">Capítulo</label><select id="chapterTest">'+chapters.map(ch=>'<option value="'+ch.number+'" '+(ch.number===S.activeChapter?'selected':'')+'>'+ch.number+' · '+esc(ch.title)+'</option>').join("")+'</select><button class="btn secondary" data-action="chapter-test">Iniciar test</button></article>'+
- '<article class="surface option-card"><span class="large-icon">'+icon("award")+'</span><h2>Repaso acumulativo</h2><p>Examen final y repetición prioritaria de errores.</p><div class="action-row"><button class="btn secondary" data-action="cumulative">Repasar</button><button class="btn secondary" data-action="final">Examen</button></div></article></div>'+
- '<section class="surface section-gap"><p class="eyebrow">CÁLCULO Y RAZONAMIENTO</p><h2>Del papel ECG a la decisión</h2><p>Aprende a estimar el eje eléctrico, la frecuencia y el QT corregido; interpreta los signos antes de usar los números.</p><div class="action-row"><button class="btn primary" data-action="open-axis">Eje eléctrico: lección y seis casos →</button><button class="btn secondary" data-action="open-calculators">Frecuencia y QTc</button></div></section>'+
- '<section class="surface section-gap"><h2>Reconocimiento de arritmias</h2><p>Utiliza los retos del monitor docente para comparar trazados sintéticos y reconocer sus limitaciones.</p><button class="btn secondary" data-page="monitor">Abrir monitor →</button></section>';
+ return heading("ENTRENAMIENTO","Practicar el capítulo 1","Solo preguntas y herramientas de las lecciones revisadas.")+
+ '<div class="practice-grid"><article class="surface option-card"><span class="large-icon">'+icon("book")+'</span><h2>Test de fundamentos</h2><p>10 preguntas sobre el registro eléctrico, las ondas y las derivaciones de Einthoven, con corrección razonada.</p><button class="btn primary" data-test-chapter="1">Iniciar test</button></article>'+
+ '<article class="surface option-card"><span class="large-icon">'+icon("activity")+'</span><h2>Herramientas educativas</h2><p>Identifica P, QRS y T, diferencia la actividad eléctrica de la mecánica y calcula DI, DII y DIII.</p><button class="btn secondary" data-chapter="1">Abrir capítulo 1</button></article>'+
+ '<article class="surface option-card"><span class="large-icon">'+icon("award")+'</span><h2>Repasar preguntas</h2><p>Recupera conocimientos y comprueba tus errores. Las habilidades se evalúan en las lecciones.</p><button class="btn secondary" data-action="cumulative">Empezar repaso</button></article></div>'+
+ '<section class="surface section-gap"><h2>Monitor ECG</h2><p>Simulador independiente de trazados sintéticos; sus ritmos aún requieren revisión clínica individual.</p><button class="btn secondary" data-page="monitor">Abrir monitor</button></section>';
 }
 function progress(){
  const e=estimate(),pct=Math.round(100*e.completed/e.total);
