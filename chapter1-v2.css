@@ -1,0 +1,138 @@
+/* ECG · Chapter 1 V2 — visually reauthored interactive learning.
+   No informative text is placed on top of the anatomical SVG. */
+.c1v-module{--c1v-ink:#133d53;--c1v-teal:#087b8c;--c1v-soft:#f3f9f7;--c1v-line:#d9e8e6;width:100%;min-width:0;color:var(--c1v-ink)}
+.lesson-layout:has(.c1v-module){grid-template-columns:minmax(0,1fr);max-width:1240px}
+.lesson-layout:has(.c1v-module) .lesson-aside{display:none}
+.lesson-layout:has(.c1v-module)>.lesson-main{min-width:0;width:100%;max-width:1240px}
+.lesson-layout:has(.c1v-module) .lesson-actions{max-width:1000px;margin-inline:auto}
+.lesson-layout:has(.c1v-module)>.lesson-main>.lesson-intro{display:none}
+.c1v-surface{background:#fff;border:1px solid var(--c1v-line);border-radius:22px;padding:clamp(15px,2vw,28px);box-shadow:0 7px 24px rgba(29,79,84,.045);margin:0 0 22px;min-width:0}
+.c1v-section-head{margin-bottom:19px}
+.c1v-eyebrow{display:block;color:#08798a;font-weight:800;font-size:.76rem;letter-spacing:.135em;margin-bottom:10px}
+.c1v-section-head h2{font-size:clamp(1.45rem,3vw,2.1rem);letter-spacing:-.025em;line-height:1.16;color:#143f54;margin:0 0 8px}
+.c1v-section-head p{font-size:clamp(.9rem,1.3vw,1.02rem);color:#55717b;line-height:1.55;margin:0;max-width:67ch}
+.c1v-stage-grid{display:grid;grid-template-columns:minmax(0,1.14fr) minmax(310px,.86fr);gap:clamp(14px,2.3vw,26px);align-items:stretch}
+.c1v-artwork{min-width:0;overflow:hidden;border:1px solid #dcece8;border-radius:20px;background:linear-gradient(140deg,#fbfdfc,#eefaF6)}
+.c1v-artbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 18px 5px;font-size:.74rem;font-weight:800;letter-spacing:.07em;color:#3e6c78}
+.c1v-artbar-label{background:#e1f1ec;color:#276e65;border-radius:999px;white-space:nowrap;padding:7px 11px;letter-spacing:0;font-size:.72rem}
+.c1v-heart-canvas{padding:0 10px}
+.c1v-heart{display:block;width:min(100%,520px);max-width:100%;height:auto;margin:0 auto;overflow:visible;filter:drop-shadow(0 11px 10px rgba(55,74,75,.09))}
+.c1v-anatomy-foot{font-size:.72rem;color:#59727a;text-align:center;line-height:1.45;padding:4px 8px 14px}
+.c1v-route{stroke:#efc66d;stroke-width:6;opacity:.3;transition:opacity .28s,stroke-width .28s;stroke-dasharray:6 11}
+.c1v-route-fine{stroke-width:3.5}
+.c1v-heart-canvas[data-c1v-current="sa"] .c1v-route-atria,.c1v-heart-canvas[data-c1v-current="atria"] .c1v-route-atria{opacity:1;stroke:#fbe6a1;stroke-width:7}
+.c1v-heart-canvas[data-c1v-current="av"] .c1v-route-av,.c1v-heart-canvas[data-c1v-current="his"] .c1v-route-vent,.c1v-heart-canvas[data-c1v-current="qrs"] .c1v-route-vent,.c1v-heart-canvas[data-c1v-current="qrs"] .c1v-route-fine{opacity:1;stroke:#ffe38c}
+.c1v-heart-canvas[data-c1v-current="t"] .c1v-route-vent,.c1v-heart-canvas[data-c1v-current="t"] .c1v-route-fine{opacity:.6;stroke:#a2e5d5}
+.c1v-atrial-glow,.c1v-ventricle-glow{opacity:0;transition:opacity .28s}
+.c1v-heart-canvas[data-c1v-current="atria"] .c1v-atrial-glow{opacity:.95}
+.c1v-heart-canvas[data-c1v-current="qrs"] .c1v-ventricle-glow{opacity:.96}
+.c1v-heart-canvas[data-c1v-current="t"] .c1v-ventricle-glow{opacity:.75;filter:hue-rotate(95deg)}
+.c1v-signal .c1v-spot-hit{cursor:pointer}
+.c1v-signal .c1v-spot-aura{fill:#edf5cb;opacity:.2;filter:url(#c1v-pulse);transition:opacity .2s}
+.c1v-signal .c1v-spot-core{fill:#f3d58d;stroke:#fff4bc;stroke-width:2;opacity:.45;transition:opacity .2s}
+.c1v-signal.on .c1v-spot-core{fill:#ffe89b;stroke:#fff;opacity:1}
+.c1v-signal.on .c1v-spot-aura{opacity:1;fill:#fce8a0}
+.c1v-signal:focus-visible .c1v-spot-hit{stroke:#0a8e9c;stroke-width:3}
+.c1v-heart-canvas[data-c1v-playing="true"] .c1v-route{animation:c1v-electrical 1.7s linear infinite}
+.c1v-heart-canvas[data-c1v-playing="true"] .c1v-signal.on .c1v-spot-aura{animation:c1v-beacon 1.4s ease-in-out infinite alternate}
+@keyframes c1v-electrical{to{stroke-dashoffset:-34}}
+@keyframes c1v-beacon{to{opacity:.48;transform:translate(0,0)}}
+.c1v-side{display:flex;min-width:0;flex-direction:column;gap:16px}
+.c1v-explain{background:#f4f9f8;border:1px solid #dfebea;border-radius:16px;padding:clamp(15px,2vw,22px)}
+.c1v-minihead{font-size:.73rem;letter-spacing:.1em;font-weight:850;color:#247c8c;margin-bottom:8px}
+.c1v-explain h3{font-size:clamp(1.2rem,2vw,1.5rem);line-height:1.25;color:#163f56;margin:0 0 13px}
+.c1v-explain p{font-size:.93rem;line-height:1.65;margin:0;color:#405e6c}
+.c1v-ecg-fact{border-left:4px solid #0d8393;background:#eaf6f3;padding:13px 14px;margin-top:17px;border-radius:9px}
+.c1v-ecg-fact strong{font-size:.84rem;color:#13576b}
+.c1v-ecg-fact p{font-size:.85rem;color:#365f6d;margin:4px 0 0}
+.c1v-player{display:grid;align-content:center;gap:12px;border:1px solid #ddebe8;border-radius:16px;padding:15px;background:#fff}
+.c1v-player-row{display:flex;align-items:center;justify-content:center;gap:clamp(6px,1.2vw,11px);min-width:0}
+.c1v-player button,.c1v-lesson-waves button,.c1v-check button{font-family:inherit;cursor:pointer}
+.c1v-round{border:1px solid #dce9e7;background:#f4f8f7;color:#205569;width:46px;height:46px;flex-shrink:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+.c1v-icon{width:20px;height:20px}
+.c1v-play{border:0;background:#07677c;color:white;min-height:48px;border-radius:26px;display:inline-flex;justify-content:center;align-items:center;gap:7px;font-size:.86rem;font-weight:800;padding:0 17px;box-shadow:0 5px 12px rgba(10,92,106,.2)}
+.c1v-speed-row{display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}
+.c1v-speed-row span{font-size:.74rem;color:#54727b;margin-right:auto}
+.c1v-speed-row button{border:1px solid #dae8e5;min-width:41px;min-height:42px;border-radius:12px;padding:7px;background:#f5f9f8;color:#3a6470;font-size:.78rem;font-weight:800}
+.c1v-speed-row button.selected{background:#087688;border-color:#087688;color:#fff}
+.c1v-step-picker{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;padding:12px 13px;min-height:45px;background:#edf6f4;color:#18536a;border:1px solid #d7e8e3;border-radius:11px;font-size:.86rem;font-weight:750}
+.c1v-steps-panel{max-height:270px;overflow-y:auto;border:1px solid #deebe8;border-radius:12px;background:#fff;padding:6px}
+.c1v-steps-panel button{width:100%;border:0;background:#fff;display:flex;align-items:center;text-align:left;min-height:45px;gap:9px;color:#28566a;font-size:.82rem;border-radius:9px}
+.c1v-steps-panel button.active{background:#e4f4f0;font-weight:800}
+.c1v-step-index{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#dfeeea;flex-shrink:0;color:#1c6572;font-weight:800}
+.c1v-steps-panel .active .c1v-step-index{background:#096e80;color:#fff}
+.c1v-ecg-box{border:1px solid #ddebe8;border-radius:16px;padding:15px 16px;background:#fff;margin-top:18px}
+.c1v-ecg-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.c1v-ecg-title strong{font-size:.95rem;color:#16475a}
+.c1v-ecg-title span{font-size:.75rem;color:#67818c;text-align:right}
+.c1v-trace-card{overflow:hidden;border:1px solid #f0e2e5;border-radius:12px;background:#fffafb}
+.c1v-trace{width:100%;height:auto;display:block;max-height:220px;overflow:visible}
+.c1v-note{font-size:.74rem;color:#607c82;line-height:1.45;margin:13px 2px 0}
+.c1v-check h3,.c1v-summary h3{font-size:1.15rem;color:#174c60;line-height:1.3;margin:2px 0 12px}
+.c1v-answers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.c1v-answers button{min-height:49px;border-radius:12px;border:1px solid #d4e6e5;background:#f7fbfa;color:#1a5668;text-align:center;padding:12px;font-size:.85rem;font-weight:700}
+.c1v-answers button:disabled{opacity:.7}
+.c1v-feedback{background:#f0f7f5;border-radius:11px;padding:12px 14px;margin-top:13px;border-left:4px solid #127c86}
+.c1v-feedback.incorrect{background:#fff3f4;border-color:#bc6678}
+.c1v-feedback strong{font-size:.86rem}
+.c1v-feedback p{font-size:.85rem;line-height:1.5;margin:6px 0}
+.c1v-feedback button{border:0;background:transparent;color:#0b6c7c;text-decoration:underline;font-weight:800;padding:8px}
+.c1v-mode{display:flex;gap:4px;max-width:340px;background:#e9f2f0;padding:4px;border-radius:12px;margin-bottom:18px}
+.c1v-mode button{flex:1;border:0;background:transparent;border-radius:10px;min-height:47px;font-size:.85rem;font-weight:800;color:#41646f}
+.c1v-mode button.selected{background:white;color:#096d7e;box-shadow:0 2px 8px rgba(18,78,85,.13)}
+.c1v-wave-frame{background:#f7fbfa;padding:clamp(11px,2vw,18px);border:1px solid #e1eeeb;border-radius:16px}
+.c1v-wave-controls{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:15px}
+.c1v-wave-controls button{border:1px solid #cde4e1;min-height:50px;border-radius:10px;background:#fff;color:#205566;font-weight:850;font-size:.81rem;padding:8px 3px}
+.c1v-wave-controls button.selected{background:#0a7183;border-color:#0a7183;color:#fff}
+.c1v-lesson-waves>.c1v-explain{margin-top:18px}
+.c1v-primary{display:inline-flex;min-height:46px;padding:11px 17px;align-items:center;justify-content:center;background:#0a7081;border:0;border-radius:11px;color:#fff;font-weight:850;margin-top:12px}
+.c1v-three-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.c1v-three-facts div{display:grid;gap:6px;background:#f1f8f6;border-radius:12px;padding:15px}
+.c1v-three-facts strong{font-size:.9rem;color:#14556a}
+.c1v-three-facts span{font-size:.83rem;color:#57717d;line-height:1.45}
+.c1v-summary>p{font-size:.89rem;line-height:1.6;color:#456573}
+.c1v-module button:focus-visible,.c1v-module [role="button"]:focus-visible{outline:3px solid #dba144;outline-offset:2px}
+@media(max-width:1060px){.c1v-stage-grid{grid-template-columns:minmax(0,1fr)}.c1v-heart{max-width:510px}.c1v-side{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}.c1v-player{align-self:start}}
+@media(max-width:700px){
+ .c1v-surface{padding:14px;border-radius:17px;margin-bottom:15px}
+ .c1v-stage-grid{gap:13px}
+ .c1v-side{display:flex;flex-direction:column;gap:12px}
+ .c1v-artbar{padding:12px 13px 2px}
+ .c1v-heart-canvas{padding:0 3px}
+ .c1v-heart{max-width:500px}
+ .c1v-anatomy-foot{padding-bottom:12px}
+ .c1v-explain{padding:15px}
+ .c1v-explain h3{font-size:1.22rem}
+ .c1v-player{padding:12px;width:100%}
+ .c1v-player-row{justify-content:space-between}
+ .c1v-ecg-box{margin-top:13px;padding:12px}
+ .c1v-answers{grid-template-columns:minmax(0,1fr)}
+ .c1v-wave-controls{gap:4px}
+ .c1v-wave-controls button{font-size:.73rem}
+ .c1v-three-facts{grid-template-columns:1fr}
+}
+@media(max-width:390px){.c1v-round{width:42px;height:42px}.c1v-play{padding-inline:11px;min-height:45px;font-size:.79rem}.c1v-artbar-title{font-size:.64rem}.c1v-wave-controls button{font-size:.68rem}}
+@media(prefers-reduced-motion:reduce){.c1v-route,.c1v-spot-aura,.c1v-signal{animation:none!important;transition:none!important}}
+
+/* Small, usable progression tabs replace the hidden legacy sidebar. */
+.c1v-topic-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;background:#ebf4f1;border:1px solid #dcebe7;border-radius:13px;padding:5px;margin-bottom:16px;min-width:0}
+.c1v-topic-nav button{min-height:45px;border:0;border-radius:10px;background:transparent;color:#456c77;font-size:.82rem;font-weight:800;padding:8px 5px;white-space:normal;line-height:1.25;cursor:pointer}
+.c1v-topic-nav button.active{background:#fff;color:#095d72;box-shadow:0 2px 8px rgba(11,82,92,.10)}
+.c1v-topic-nav button:focus-visible{outline:3px solid #dba144;outline-offset:2px}
+@media(max-width:390px){.c1v-topic-nav button{font-size:.73rem;padding:7px 3px}}
+
+/* Third lesson now shares the spacious chapter-one stage rather than old narrow sidebar. */
+.lesson-layout:has(.c1-einthoven-panel){grid-template-columns:minmax(0,1fr);max-width:1240px}
+.lesson-layout:has(.c1-einthoven-panel) .lesson-aside{display:none}
+.lesson-layout:has(.c1-einthoven-panel)>.lesson-main{max-width:1240px;width:100%;min-width:0}
+.lesson-layout:has(.c1-einthoven-panel) .c1-einthoven-panel{border-radius:22px;box-shadow:0 7px 24px rgba(29,79,84,.045);padding:clamp(15px,2vw,28px)}
+.lesson-layout:has(.c1-einthoven-panel) .c1-einthoven-layout{grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);gap:clamp(16px,2.5vw,30px)}
+.lesson-layout:has(.c1-einthoven-panel) .c1-einthoven-figure{border-radius:18px}
+.lesson-layout:has(.c1-einthoven-panel) .c1-triangle{max-width:650px}
+.lesson-layout:has(.c1-einthoven-panel) .c1-title h2{font-size:clamp(1.45rem,3vw,2.1rem)}
+@media(max-width:1050px){.lesson-layout:has(.c1-einthoven-panel) .c1-einthoven-layout{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:700px){.lesson-layout:has(.c1-einthoven-panel) .c1-einthoven-panel{border-radius:17px;padding:14px}.lesson-layout:has(.c1-einthoven-panel) .c1-triangle{width:100%}}
+
+.c1v-history{border:1px solid #d9e8e6;background:#f9fcfb;border-radius:14px;padding:14px 17px;margin:0 0 20px;color:#3e6271}
+.c1v-history summary{font-size:.87rem;font-weight:800;color:#19586d;cursor:pointer;min-height:32px}
+.c1v-history p{font-size:.87rem;line-height:1.6;margin:11px 0 2px}
