@@ -56,7 +56,7 @@ function render(){
 function home(){
  const c=chapters[0],done=c.topics.filter(t=>S.done[t.id]).length;
  return '<section class="hero"><div class="hero-copy"><p class="eyebrow">APRENDER ELECTROCARDIOGRAFÍA</p><h1>Comprende el trazado.<br><em>Reconoce el patrón.</em></h1><p>Aprende con un capítulo revisado cada vez: explicaciones, herramientas interactivas y práctica.</p><div class="action-row"><button class="btn primary" data-chapter="1">Abrir capítulo 1 →</button><button class="btn secondary" data-page="monitor">Monitor ECG</button></div></div><div class="hero-wave">'+waveSvg("hero-wave-svg")+'<div class="wave-caption">ECG · señal ilustrativa en DII</div></div></section>'+
- '<section class="section-gap"><div class="row-between"><h2>Capítulo disponible</h2><span class="pill neutral">'+done+'/'+c.topics.length+' lecciones</span></div><div class="chapter-grid">'+chapterCard(c)+'</div></section>';
+ '<section class="section-gap"><div class="row-between"><h2>Capítulo disponible</h2><span class="pill neutral">'+done+'/'+c.topics.length+' lecciones</span></div><div class="chapter-grid chapter-grid-available">'+chapterCard(c)+'</div></section>';
 }
 function chapterCard(c){
  const n=c.number,done=c.topics.filter(t=>S.done[t.id]).length,pct=Math.round(done/c.topics.length*100);
