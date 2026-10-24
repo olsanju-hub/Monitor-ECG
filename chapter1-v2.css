@@ -113,3 +113,10 @@
 }
 @media(max-width:390px){.c1v-round{width:42px;height:42px}.c1v-play{padding-inline:11px;min-height:45px;font-size:.79rem}.c1v-artbar-title{font-size:.64rem}.c1v-wave-controls button{font-size:.68rem}}
 @media(prefers-reduced-motion:reduce){.c1v-route,.c1v-spot-aura,.c1v-signal{animation:none!important;transition:none!important}}
+
+/* Small, usable progression tabs replace the hidden legacy sidebar. */
+.c1v-topic-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;background:#ebf4f1;border:1px solid #dcebe7;border-radius:13px;padding:5px;margin-bottom:16px;min-width:0}
+.c1v-topic-nav button{min-height:45px;border:0;border-radius:10px;background:transparent;color:#456c77;font-size:.82rem;font-weight:800;padding:8px 5px;white-space:normal;line-height:1.25;cursor:pointer}
+.c1v-topic-nav button.active{background:#fff;color:#095d72;box-shadow:0 2px 8px rgba(11,82,92,.10)}
+.c1v-topic-nav button:focus-visible{outline:3px solid #dba144;outline-offset:2px}
+@media(max-width:390px){.c1v-topic-nav button{font-size:.73rem;padding:7px 3px}}
