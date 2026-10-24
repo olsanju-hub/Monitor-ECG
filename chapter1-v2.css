@@ -136,3 +136,34 @@
 .c1v-history{border:1px solid #d9e8e6;background:#f9fcfb;border-radius:14px;padding:14px 17px;margin:0 0 20px;color:#3e6271}
 .c1v-history summary{font-size:.87rem;font-weight:800;color:#19586d;cursor:pointer;min-height:32px}
 .c1v-history p{font-size:.87rem;line-height:1.6;margin:11px 0 2px}
+
+/* Photorealistic teaching base + independently controllable electrical overlay.
+   Both layers share the exact same aspect ratio/viewBox, independent of viewport. */
+.c1v-heart-image-mode{padding:0 8px 10px}
+.c1v-image-stack{position:relative;display:block;width:min(100%,470px);max-width:100%;aspect-ratio:357/373;margin:0 auto;border-radius:14px;overflow:hidden;isolation:isolate;background:#eef3f4}
+.c1v-anatomy-photo{display:block;width:100%;height:100%;object-fit:fill;user-select:none;-webkit-user-drag:none}
+.c1v-heart-image-mode .c1v-heart.c1v-anatomy-overlay{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;margin:0;overflow:visible;filter:none;z-index:2}
+.c1v-heart-image-mode .c1v-overlay-route{stroke:#fff0a5;stroke-width:5;stroke-dasharray:6 9;opacity:0;filter:drop-shadow(0 0 5px rgba(250,209,69,.7));transition:opacity .2s ease-out}
+.c1v-heart-image-mode[data-c1v-current="sa"] .c1v-overlay-atria{opacity:.6}
+.c1v-heart-image-mode[data-c1v-current="atria"] .c1v-overlay-atria{opacity:1}
+.c1v-heart-image-mode[data-c1v-current="av"] .c1v-overlay-av{opacity:1}
+.c1v-heart-image-mode[data-c1v-current="his"] .c1v-overlay-his{opacity:1}
+.c1v-heart-image-mode[data-c1v-current="qrs"] .c1v-overlay-ventricle{opacity:1;stroke:#fff3ba}
+.c1v-heart-image-mode[data-c1v-current="t"] .c1v-overlay-recovery{opacity:1;stroke:#9aece0}
+.c1v-heart-image-mode .c1v-spot-aura{fill:#f9dd79;opacity:0;filter:url(#c1v-new-glow)}
+.c1v-heart-image-mode .c1v-spot-core{fill:#ffdfa0;opacity:0;stroke:#fff;stroke-width:2}
+.c1v-heart-image-mode .c1v-signal.on .c1v-spot-aura{opacity:.92}
+.c1v-heart-image-mode .c1v-signal.on .c1v-spot-core{opacity:1}
+.c1v-heart-image-mode [data-c1v-spot]{cursor:pointer;touch-action:manipulation;outline:none}
+.c1v-heart-image-mode [data-c1v-spot]:focus-visible .c1v-spot-hit{stroke:#fff3b8;stroke-width:3}
+.c1v-heart-image-mode[data-c1v-playing="true"] .c1v-overlay-route{animation:c1v-anatomy-flow 1.1s linear infinite}
+.c1v-heart-image-mode[data-c1v-playing="true"] .c1v-signal.on .c1v-spot-aura{animation:c1v-beacon 1.4s ease-in-out infinite alternate}
+@keyframes c1v-anatomy-flow{to{stroke-dashoffset:-45}}
+@media(max-width:700px){
+ .c1v-heart-image-mode{padding:0 4px 10px}
+ .c1v-image-stack{width:min(100%,430px)}
+}
+@media(prefers-reduced-motion:reduce){
+ .c1v-heart-image-mode .c1v-overlay-route,
+ .c1v-heart-image-mode .c1v-spot-aura{animation:none!important;transition:none!important}
+}
