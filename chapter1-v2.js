@@ -39,30 +39,64 @@ function icon(name){return ({
  reset:'<path d="M3 11a9 9 0 1 1 2.7 6.4M3 4v7h7"/>'
  }[name]||"")}
 function pictogram(n){return '<svg class="c1v-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">'+icon(n)+'</svg>'}
+/* A single SVG coordinate space for the anatomical bitmap and educational overlay.
+ * Landmarks are calibrated to the actual 357 × 373 source artwork.
+ * The image itself is illustrative, not a verified dissection.
+ */
+const C1_LANDMARKS=Object.freeze({
+ sa:[125,122],atria:[236,157],av:[177,190],his:[190,225],
+ qrs:[241,276],t:[244,295]
+});
 function heart(){
  const active=steps[v.step].link;
- const anatomyLabels={sa:"nodo sinoauricular",atria:"activación auricular",av:"nodo auriculoventricular",his:"His, ramas y Purkinje",qrs:"activación ventricular",t:"repolarización ventricular"};
- const spots=[["sa",108,126],["atria",236,156],["av",152,191],["his",178,236],["qrs",232,274],["t",282,325]];
- const marks=spots.map(([id,x,y])=>{
-  const on=id===active?" on":"";
+ const anatomyLabels={
+  sa:"nodo sinoauricular",atria:"despolarización de ambas aurículas",
+  av:"nodo auriculoventricular",his:"haz de His, ramas y fibras de Purkinje",
+  qrs:"miocardio ventricular en despolarización",t:"miocardio ventricular en repolarización"
+ };
+ const point=(id)=>{
+  const [x,y]=C1_LANDMARKS[id],on=id===active?" on":"";
   return '<g role="button" tabindex="0" class="c1v-signal'+on+'" data-c1v-spot="'+id+'" aria-label="Explorar '+anatomyLabels[id]+'">'+
-    '<circle cx="'+x+'" cy="'+y+'" r="23" class="c1v-spot-hit" fill="transparent"/>'+
-    '<circle cx="'+x+'" cy="'+y+'" r="17" class="c1v-spot-aura"/>'+
-    '<circle cx="'+x+'" cy="'+y+'" r="5.5" class="c1v-spot-core"/></g>';
- }).join("");
- return '<div class="c1v-heart-canvas c1v-heart-image-mode" data-c1v-current="'+active+'" data-c1v-playing="'+v.playing+'" aria-label="Imagen anatómica con ruta eléctrica interactiva">'+
+   '<circle class="c1v-spot-hit" cx="'+x+'" cy="'+y+'" r="24" fill="transparent"/>'+
+   '<circle class="c1v-spot-aura" cx="'+x+'" cy="'+y+'" r="16"/>'+
+   '<circle class="c1v-spot-core" cx="'+x+'" cy="'+y+'" r="5.5"/></g>';
+ };
+ const region=(id,d)=>{
+  const on=id===active?" on":"";
+  return '<g role="button" tabindex="0" class="c1v-signal c1v-region-hotspot'+on+'" data-c1v-spot="'+id+'" aria-label="Explorar '+anatomyLabels[id]+'">'+
+  '<path d="'+d+'" class="c1v-region-hit" fill="transparent" stroke="transparent" stroke-width="13"/></g>';
+ };
+ // Phases QRS and T concern ventricular myocardium, not discrete conducting nodes.
+ const rightV='M113 221Q140 210 170 240Q177 282 206 323Q170 326 121 301Q103 266 113 221Z';
+ const leftV='M202 214Q242 201 276 232Q318 274 302 331Q263 356 220 325Q199 283 202 214Z';
+ return '<div class="c1v-heart-canvas c1v-heart-image-mode" data-c1v-current="'+active+'" data-c1v-playing="'+v.playing+'" aria-label="Ilustración anatómica con capa de activación eléctrica">'+
  '<div class="c1v-image-stack">'+
- '<img class="c1v-anatomy-photo" src="assets/chapter1/heart-anatomy.webp" width="357" height="373" loading="eager" decoding="async" alt="Corazón humano en corte anatómico semirrealista; vasos, aurículas, ventrículos y vías de conducción representadas con finalidad docente.">'+
- '<svg class="c1v-heart c1v-anatomy-overlay" viewBox="0 0 357 373" role="group" aria-label="Capa táctil y animada de conducción eléctrica, alineada sobre la ilustración anatómica" preserveAspectRatio="xMidYMid meet">'+
- '<defs><filter id="c1v-new-glow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="5"/></filter></defs>'+
- '<g fill="none" stroke-linecap="round" stroke-linejoin="round" class="c1v-overlay-routes">'+
- '<path class="c1v-overlay-route c1v-overlay-atria" d="M108 126C122 138 135 161 152 191M108 126C150 112 184 126 236 156"/>'+
- '<path class="c1v-overlay-route c1v-overlay-av" d="M152 191Q161 214 178 236"/>'+
- '<path class="c1v-overlay-route c1v-overlay-his" d="M178 236Q159 266 132 298M178 236Q205 257 229 283L282 325M151 267L110 304M216 281L252 317"/>'+
- '<path class="c1v-overlay-route c1v-overlay-ventricle" d="M124 250Q138 304 173 329M221 233Q247 276 282 325"/>'+
- '<path class="c1v-overlay-route c1v-overlay-recovery" d="M143 313Q167 270 197 252M285 313Q278 264 239 239"/>'+
- '</g>'+marks+'</svg></div>'+
- '<div class="c1v-anatomy-foot">Ilustración anatómica semirrealista · Actividad eléctrica resaltada por fases · Toca una zona para explorarla</div></div>';
+ '<svg class="c1v-heart c1v-anatomy-overlay c1v-anatomy-composite" viewBox="0 0 357 373" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Corazón en corte y estructuras eléctricas interactivas, sincronizados en un solo sistema de coordenadas" preserveAspectRatio="xMidYMid meet">'+
+ '<title>Corazón en corte y propagación eléctrica</title>'+
+ '<defs><filter id="c1v-new-glow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="4"/></filter>'+
+ '<radialGradient id="c1v-chamber-activation"><stop offset="0" stop-color="#fff1ac" stop-opacity=".48"/><stop offset="1" stop-color="#fff1ac" stop-opacity="0"/></radialGradient>'+
+ '<linearGradient id="c1v-repolarization" x1="0" y1="1" x2=".9" y2="0"><stop offset="0" stop-color="#5bd6d3" stop-opacity=".12"/><stop offset=".6" stop-color="#69bad8" stop-opacity=".33"/><stop offset="1" stop-color="#9dd8eb" stop-opacity=".12"/></linearGradient></defs>'+
+ '<image class="c1v-anatomy-photo" href="assets/chapter1/heart-anatomy.webp" x="0" y="0" width="357" height="373" preserveAspectRatio="none" aria-label="Ilustración anatómica semirrealista del corazón"/>'+
+ '<g class="c1v-tissue-states" aria-hidden="true">'+
+ '<ellipse class="c1v-tissue c1v-tissue-atria" cx="144" cy="155" rx="51" ry="57" fill="url(#c1v-chamber-activation)"/>'+
+ '<ellipse class="c1v-tissue c1v-tissue-atria" cx="243" cy="166" rx="43" ry="38" fill="url(#c1v-chamber-activation)"/>'+
+ '<path class="c1v-tissue c1v-tissue-qrs" d="'+rightV+'" fill="#fff0a4" fill-opacity=".26"/>'+
+ '<path class="c1v-tissue c1v-tissue-qrs" d="'+leftV+'" fill="#fff0a4" fill-opacity=".26"/>'+
+ '<path class="c1v-tissue c1v-tissue-t" d="'+rightV+'" fill="url(#c1v-repolarization)"/>'+
+ '<path class="c1v-tissue c1v-tissue-t" d="'+leftV+'" fill="url(#c1v-repolarization)"/>'+
+ '</g>'+
+ '<g class="c1v-overlay-routes" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+ // initial activation only is a spot, not a premature path across the atria
+ '<path class="c1v-overlay-route c1v-overlay-atria" d="M125 122Q145 119 168 129Q196 136 227 158M125 122Q139 145 160 164"/>'+
+ '<path class="c1v-overlay-route c1v-overlay-av" d="M145 151Q156 169 177 190"/>'+
+ // His conducts centrally along the septum and branches toward subendocardium
+ '<path class="c1v-overlay-route c1v-overlay-his" d="M177 190Q187 203 190 225Q184 246 162 273Q144 292 132 304M190 225Q203 249 228 276Q250 300 278 323"/>'+
+ '<path class="c1v-overlay-route c1v-overlay-his" d="M161 272Q147 272 134 263M228 276Q257 273 275 281"/>'+
+ '</g>'+
+ point("sa")+point("atria")+point("av")+point("his")+
+ region("qrs",rightV)+region("t",leftV)+
+ '</svg></div>'+
+ '<div class="c1v-anatomy-foot">Esquema anatómico docente · Selecciona una fase o una región · La animación no reproduce tiempos fisiológicos a escala</div></div>';
 }
 function waveCard(section){
  const chosen=section||"none";
