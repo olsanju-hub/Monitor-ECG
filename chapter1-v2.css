@@ -132,3 +132,7 @@
 .lesson-layout:has(.c1-einthoven-panel) .c1-title h2{font-size:clamp(1.45rem,3vw,2.1rem)}
 @media(max-width:1050px){.lesson-layout:has(.c1-einthoven-panel) .c1-einthoven-layout{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:700px){.lesson-layout:has(.c1-einthoven-panel) .c1-einthoven-panel{border-radius:17px;padding:14px}.lesson-layout:has(.c1-einthoven-panel) .c1-triangle{width:100%}}
+
+.c1v-history{border:1px solid #d9e8e6;background:#f9fcfb;border-radius:14px;padding:14px 17px;margin:0 0 20px;color:#3e6271}
+.c1v-history summary{font-size:.87rem;font-weight:800;color:#19586d;cursor:pointer;min-height:32px}
+.c1v-history p{font-size:.87rem;line-height:1.6;margin:11px 0 2px}
