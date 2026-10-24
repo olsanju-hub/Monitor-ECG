@@ -37,75 +37,73 @@ async function run(){
  let failures=0;
  try{
   for(const width of [375,390,430,768,1440]){
-   const mobile=width<=768;
-   const context=await browser.newContext({viewport:{width,height:850},isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1});
+   const mobile=width<=768,context=await browser.newContext({
+    viewport:{width,height:850},isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1
+   });
    const page=await context.newPage();
-   page.on("pageerror",error=>{console.error("Browser error:",error.message);failures++});
+   page.on("pageerror",err=>{console.error("Browser error: "+err.message);failures++});
    await page.goto("http://127.0.0.1:"+port+"/",{waitUntil:"domcontentloaded"});
    await page.locator(".hero").waitFor();
-   await checkViewport(page,"home "+width,width);
-   for(const lab of ["conduction","vectors","placement","measurement"]){
-    await page.locator('[data-page="practice"]:visible').first().click();
-    await page.locator('[data-action="lab-'+lab+'"]').click();
-    await page.locator("#ecg-lab").waitFor();
-    await checkViewport(page,lab+" "+width,width);
-    if(lab!=="measurement"){
-     const diagram=page.locator(".lab-figure-container .lab-figure");
-     const frame=page.locator(".lab-diagram-viewport");
-     const figureWidth=await diagram.evaluate(x=>x.getBoundingClientRect().width);
-     const frameWidth=await frame.evaluate(x=>x.clientWidth);
-     assert.ok(figureWidth<=frameWidth+2,"Figure should fit by default: "+lab+" "+width+" "+figureWidth+" > "+frameWidth);
-     await page.locator('[data-lab-action="zoom-toggle"]').click();
-     await checkViewport(page,"zoom "+lab+" "+width,width);
-     if(width<690){
-      const dims=await frame.evaluate(x=>({scrollWidth:x.scrollWidth,clientWidth:x.clientWidth}));
-      assert.ok(dims.scrollWidth>dims.clientWidth+100,"Zoom must scroll internally: "+lab+" "+width+" "+JSON.stringify(dims));
-     }
-     await page.locator('[data-lab-action="zoom-toggle"]').click();
-     await checkViewport(page,"fit again "+lab+" "+width,width);
-    }
+   await checkViewport(page,"minimal home "+width,width);
+   const homeText=await page.locator("#screen").innerText();
+   for(const forbidden of ["PRÓXIMO PASO","TU RUTA","Aprendizaje en un día","Nodo sinusal y automatismo","Capítulos del libro"]){
+    assert.ok(!homeText.includes(forbidden),"Unapproved/noisy item on homepage: "+forbidden);
    }
+   assert.equal(await page.locator('.chapter-card').count(),1,"Exactly one approved chapter on homepage");
+   await page.locator('[data-page="route"]:visible').first().click();
+   await checkViewport(page,"approved-only route "+width,width);
+   assert.equal(await page.locator("details.outline").count(),1,"Only approved chapter is accessible");
+   assert.equal(await page.locator('button[data-test-chapter]').count(),1,"Only approved test is accessible");
    await page.locator('[data-page="practice"]:visible').first().click();
-   await page.locator('[data-action="open-axis"]').click();
-   await page.locator('#axis-masterclass').waitFor();
-   await checkViewport(page,"axis masterclass "+width,width);
-   await page.locator('[data-teach-axis-answer="normal"]').click();
-   await page.locator('.teach-feedback').first().waitFor();
-   await page.locator('[data-teach-calc="axis"]').click();
-   await page.locator('.teach-results').waitFor();
-   await checkViewport(page,"axis calculator "+width,width);
-   await page.locator('[data-page="practice"]:visible').first().click();
-   await page.locator('[data-action="open-calculators"]').click();
-   await page.locator('[data-teach-calc="rate"]').click();
-   await page.locator('#teachRateResult strong').waitFor();
-   await page.locator('[data-teach-calc="qtc"]').click();
-   await page.locator('#teachQTResult strong').waitFor();
-   await checkViewport(page,"didactic calculators "+width,width);
-   // Chapter 1 accepted design: three distinct interactive lessons.
-   await page.locator('[data-page="home"]:visible').first().click();
-   await page.locator('[data-chapter="1"]').click();
+   await checkViewport(page,"approved-only practice "+width,width);
+   assert.equal(await page.locator('button[data-action^="lab-"]').count(),0,"Unapproved labs must not appear");
+   assert.equal(await page.locator('button[data-action="open-axis"]').count(),0,"Unapproved axis tool must not appear");
+   await page.locator('[data-chapter="1"]').first().click();
    await page.locator('#chapter1-root').waitFor();
    await checkViewport(page,"fundamentals electrical "+width,width);
    await page.locator('[data-c1-phase="1"]').click();
    await page.locator('[data-c1-concept="voltage"]').click();
    await page.locator('[data-topic="C1.1"]').first().click();
-   await page.locator('#chapter1-root').waitFor();
    await checkViewport(page,"fundamentals waves "+width,width);
    await page.locator('[data-c1-mode="practice"]').click();
    await page.locator('.c1-wave-select [data-c1-wave="P"]').click();
    await page.locator('.c1-feedback.good').waitFor();
    await page.locator('[data-topic="C1.2"]').first().click();
-   await page.locator('#chapter1-root').waitFor();
    await checkViewport(page,"fundamentals Einthoven "+width,width);
    await page.locator('[data-c1-potential="bi"]').evaluate(el=>{el.value="0.4";el.dispatchEvent(new Event("input",{bubbles:true}))});
-   await page.locator('[data-c1-lead="di"]').waitFor();
    await page.locator('[data-c1-mode="practice"]').click();
    await page.locator('[data-c1-pot-answer="0.5"]').click();
    await page.locator('.c1-feedback.good').waitFor();
-   await checkViewport(page,"fundamentals skills "+width,width);
-   console.log("PASS responsive viewport "+width+"px");
+   await checkViewport(page,"fundamentals practices "+width,width);
+   await page.locator('[data-page="progress"]:visible').first().click();
+   await checkViewport(page,"approved-only progress "+width,width);
+   assert.ok((await page.locator('#screen').innerText()).includes("Fundamentos del ECG"),"progress must be approved-only");
+   await page.locator('[data-page="practice"]:visible').first().click();
+   await page.locator('[data-test-chapter="1"]').first().click();
+   await page.locator(".quiz-panel").waitFor();
+   await checkViewport(page,"approved-only quiz "+width,width);
+   assert.match(await page.locator(".quiz-panel .eyebrow").innerText(),/CAPÍTULO 1/);
+   await page.locator('[data-page="monitor"]:visible').first().click();
+   await checkViewport(page,"monitor preserved "+width,width);
+   console.log("PASS approved-only app "+width+"px");
    await context.close();
   }
+  // Legacy progress from an unapproved chapter remains in localStorage, but cannot open old lessons.
+  const context=await browser.newContext({viewport:{width:390,height:850},isMobile:true,hasTouch:true});
+  const page=await context.newPage();
+  await page.addInitScript(()=>{
+   localStorage.setItem("ecg-academia-v1",JSON.stringify({version:1,visited:{"C2.0":true},done:{"C2.0":true},attempts:[],practice:{},visualHistory:[],pretest:true,activeTopic:"C2.0",activeChapter:2,seconds:60}));
+  });
+  await page.goto("http://127.0.0.1:"+port+"/",{waitUntil:"domcontentloaded"});
+  await page.locator(".hero").waitFor();
+  await page.locator('[data-page="route"]:visible').first().click();
+  assert.equal(await page.locator("details.outline").count(),1,"Historic progress should not expose unapproved chapters");
+  await page.locator('[data-page="home"]:visible').first().click();
+  await page.locator('[data-chapter="1"]').first().click();
+  assert.match(await page.locator(".lesson-head").innerText(),/Capítulo 1/);
+  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem("ecg-academia-v1")));
+  assert.equal(stored.done["C2.0"],true,"Historical progress should be preserved");
+  await context.close();
   assert.equal(failures,0,"Unexpected JavaScript runtime errors");
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
 }
