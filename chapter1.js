@@ -15,8 +15,8 @@ const lessons=[
   "La onda P refleja la despolarización auricular; el QRS, la despolarización ventricular; y la T, su repolarización. El intervalo PR abarca desde el comienzo de P al comienzo del QRS, y el segmento ST va desde el final del QRS al inicio de T.",
   "La repolarización auricular suele quedar oculta por el QRS. La polaridad de cada deflexión depende de la derivación. No todos los QRS presentan ondas Q, R y S identificables."],
  ["Derivaciones y triángulo de Einthoven",
-  "Una derivación no es un electrodo: es una diferencia de potencial entre polos definidos. DI = BI − BD; DII = PI − BD; DIII = PI − BI. De esas tres diferencias, para el mismo instante, se deduce DII = DI + DIII.",
-  "Las derivaciones permiten contemplar la misma actividad eléctrica desde distintas perspectivas. La relación de Einthoven utiliza potenciales simultáneos y una convención de signos coherente."]
+  "Una derivación no es un electrodo: es una forma de registrar la diferencia de potencial entre dos polos eléctricos. Cada derivación tiene un polo positivo y otro negativo. Al comparar las tres derivaciones clásicas en el mismo instante se cumple: DII = DI + DIII.",
+  "Primero identifica qué extremidad corresponde a cada polo. Después resta el potencial negativo al positivo. En la relación de Einthoven los tres valores deben corresponder al mismo instante."]
 ];
 for(let i=0;i<3;i++){c.topics[i].title=lessons[i][0];c.topics[i].explanation=lessons[i][1];c.topics[i].takeaway=lessons[i][2];}
 const QUESTIONS=[
@@ -27,7 +27,7 @@ const QUESTIONS=[
  ["C1.1","¿Qué evento eléctrico corresponde al complejo QRS?",["Despolarización ventricular","Repolarización auricular aislada","Relajación mecánica ventricular","Repolarización ventricular"],"El QRS representa el proceso de activación ventricular."],
  ["C1.1","¿Qué representa la onda T?",["Repolarización ventricular","Despolarización auricular","Retraso de conducción nodal","Contracción auricular"],"La onda T corresponde a la recuperación eléctrica de los ventrículos."],
  ["C1.1","¿Puede existir un QRS sin onda Q visible y ser normal?",["Sí: Q, R y S designan deflexiones observadas, no componentes siempre obligatorios","No: toda onda R debe estar precedida por una Q","Solo si hay un infarto de miocardio","Solo si existe marcapasos"],"La nomenclatura describe la morfología en cada derivación. No todos los complejos incluyen Q, R y S."],
- ["C1.2","El brazo derecho (BD) mide 0 mV y el izquierdo (BI) +0,6 mV. DI utiliza BI como polo positivo y BD como negativo. ¿Cuánto vale DI?",["+0,6 mV","−0,6 mV","0 mV","No se puede calcular"],"DI = BI − BD = +0,6 − 0 = +0,6 mV. Los polos se identifican antes de restar."],
+ ["C1.2","El brazo derecho tiene 0 mV y el brazo izquierdo +0,6 mV. La derivación DI mide el brazo izquierdo (+) menos el brazo derecho (−). ¿Cuál es el valor de DI?",["+0,6 mV","−0,6 mV","0 mV","No se puede calcular"],"DI = potencial del brazo izquierdo − potencial del brazo derecho = +0,6 − 0 = +0,6 mV. Primero se identifican el polo positivo y el negativo."],
  ["C1.2","Si DI vale +0,6 mV y DIII vale −0,2 mV simultáneamente, ¿cuánto vale DII?",["+0,4 mV","+0,8 mV","−0,4 mV","−0,8 mV"],"DII = DI + DIII = +0,6 + (−0,2) = +0,4 mV."],
  ["C1.2","¿Un QRS predominantemente negativo significa necesariamente enfermedad?",["No: depende de cómo el vector eléctrico se proyecta sobre esa derivación","Sí: indica necrosis miocárdica","Sí: define un bloqueo de rama","Sí: implica hipopotasemia"],"Una deflexión negativa puede reflejar fuerzas eléctricas que se alejan del polo positivo; se interpreta en contexto."]
 ];
@@ -45,9 +45,9 @@ const WAVE_TASKS=[
 ];
 const POTENTIAL_CASES=[
  {bd:0,bi:.8,pi:.5,question:"Si DI = +0,8 mV y DIII = −0,3 mV, ¿cuánto vale DII?",answer:.5},
- {bd:0,bi:.6,pi:1.1,question:"Si BD = 0 mV y BI = +0,6 mV, ¿cuánto registra DI (BI−BD)?",answer:.6}
+ {bd:0,bi:.6,pi:1.1,question:"Brazo derecho: 0 mV. Brazo izquierdo: +0,6 mV. ¿Cuánto registra DI, que resta el brazo derecho al izquierdo?",answer:.6}
 ];
-const state={phase:0,mode:"learn",wave:"P",waveQuestion:0,waveDone:new Set(),potential:{bd:0,bi:.6,pi:1.1},potPractice:0,potDone:new Set(),potAnswer:null,potFeedback:null,conceptAnswer:null};
+const state={phase:0,mode:"learn",wave:"P",waveQuestion:0,waveDone:new Set(),potential:{bd:0,bi:.6,pi:1.1},selectedLead:"DI",potPractice:0,potDone:new Set(),potAnswer:null,potFeedback:null,conceptAnswer:null};
 function esc(s){return String(s).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
 function fixed(n){return (Math.abs(n)<.0001?0:n).toFixed(1).replace(".",",");}
 function round(n){return Math.round(n*10)/10;}
@@ -57,7 +57,7 @@ function record(taskId,ok,reason){
   root.ECG_recordVisualExercise({chapter:1,kind:"fundamentals",taskId,ok,reason});
 }
 function title(text,subtitle){
- return '<div class="c1-title"><p class="eyebrow">CAPÍTULO 1 · LABORATORIO DOCENTE</p><h2>'+esc(text)+'</h2><p>'+esc(subtitle)+'</p></div>';
+ return '<div class="c1-title"><p class="eyebrow">CAPÍTULO 1 · APRENDER Y PRACTICAR</p><h2>'+esc(text)+'</h2><p>'+esc(subtitle)+'</p></div>';
 }
 function waveGraphic(selected,showLabels=true,interactive=false){
  const active=selected||"none";
@@ -95,38 +95,57 @@ function wavesTool(){
  (state.waveAnswer?'<div class="c1-feedback '+(state.waveAnswer.ok?"good":"bad")+'" role="status"><strong>'+(state.waveAnswer.ok?"Identificación correcta":"Identificación incorrecta")+'</strong><p>'+esc(state.waveAnswer.reason)+'</p></div><button type="button" class="btn secondary" data-c1-action="'+(state.waveAnswer.ok?"next-wave":"retry-wave")+'">'+(state.waveAnswer.ok?"Siguiente componente →":"Reintentar")+'</button>':"")+
  '</div><div class="c1-panel"><h3>Otros componentes importantes</h3><div class="c1-two-grid"><div><strong>Intervalo PR</strong><p>Desde el comienzo de P al inicio del QRS. Incluye conducción auricular y auriculoventricular.</p></div><div><strong>Segmento ST</strong><p>Desde el final del QRS hasta el comienzo de T. Debe valorarse respecto a la línea isoeléctrica y el contexto.</p></div></div><p class="c1-muted">La repolarización auricular suele quedar enmascarada por la despolarización ventricular. Un QRS normal no requiere que se distingan ondas Q, R y S en todas las derivaciones.</p></div>';
 }
-function einthovenGraphic(){
- const coords={bd:[86,60],bi:[394,60],pi:[240,253]};
- const circle=Object.entries(coords).map(([name,[x,y]])=>'<g><circle cx="'+x+'" cy="'+y+'" r="29" fill="#eef8f7" stroke="#a8cacc" stroke-width="2"/><text x="'+x+'" y="'+(y+5)+'" fill="#16485c" font-weight="750" font-size="16" text-anchor="middle">'+name.toUpperCase()+'</text></g>').join("");
- return '<svg class="c1-triangle" viewBox="0 0 480 304" role="img" aria-label="Triángulo de Einthoven. DI: brazo derecho negativo a brazo izquierdo positivo. DII: brazo derecho negativo a pierna izquierda positiva. DIII: brazo izquierdo negativo a pierna izquierda positiva."><defs>'+
- '<marker id="c1-arrow1" viewBox="0 0 8 8" refX="6.2" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8" fill="#14788d"/></marker><marker id="c1-arrow2" viewBox="0 0 8 8" refX="6.2" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8" fill="#b18132"/></marker><marker id="c1-arrow3" viewBox="0 0 8 8" refX="6.2" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8" fill="#8773a7"/></marker></defs>'+
- '<path d="M123 60H357" stroke="#14788d" stroke-width="4" marker-end="url(#c1-arrow1)"/>'+
- '<path d="M108 87L218 223" stroke="#b18132" stroke-width="4" marker-end="url(#c1-arrow2)"/>'+
- '<path d="M372 87L262 223" stroke="#8773a7" stroke-width="4" marker-end="url(#c1-arrow3)"/>'+
- circle+'<g font-size="14" fill="#526b77" text-anchor="middle"><text x="86" y="105">Brazo derecho</text><text x="394" y="105">Brazo izquierdo</text><text x="240" y="296">Pierna izquierda</text></g>'+
- '<g font-size="17" font-weight="800" text-anchor="middle"><text x="240" y="38" fill="#14788d">DI</text><text x="119" y="169" fill="#ad7929">DII</text><text x="363" y="169" fill="#806ca2">DIII</text></g>'+
- '<g font-size="12" fill="#526b77" text-anchor="middle"><text x="156" y="50">−</text><text x="328" y="50">+</text><text x="121" y="110">−</text><text x="215" y="208">+</text><text x="359" y="110">−</text><text x="265" y="208">+</text></g>'+
- '</svg>';
+const EINTHOVEN_LEADS={
+ DI:{color:"#0d8192",positive:"Brazo izquierdo",negative:"Brazo derecho",formula:"Brazo izquierdo − brazo derecho",arrow:"M176 106H464",label:[320,74],minus:[189,83],plus:[451,83]},
+ DII:{color:"#b1853d",positive:"Pierna izquierda",negative:"Brazo derecho",formula:"Pierna izquierda − brazo derecho",arrow:"M149 143L296 319",label:[157,248],minus:[161,153],plus:[269,293]},
+ DIII:{color:"#8072a5",positive:"Pierna izquierda",negative:"Brazo izquierdo",formula:"Pierna izquierda − brazo izquierdo",arrow:"M491 143L344 319",label:[482,248],minus:[479,153],plus:[371,293]}
+};
+function einthovenGraphic(active){
+ const selected=EINTHOVEN_LEADS[active]||EINTHOVEN_LEADS.DI;
+ const activePath=Object.entries(EINTHOVEN_LEADS).map(([key,d])=>{
+  const focus=key===active;
+  return '<g class="c1-vessel" data-highlight="'+focus+'">'+
+   '<path d="'+d.arrow+'" stroke="'+d.color+'" stroke-width="'+(focus?6:3)+'" stroke-linecap="round" fill="none" opacity="'+(focus?1:.28)+'" marker-end="url(#c1-arrow-'+key+')"/>'+
+   '<text x="'+d.label[0]+'" y="'+d.label[1]+'" class="c1-fig-lead" text-anchor="middle" fill="'+d.color+'" opacity="'+(focus?1:.45)+'">'+key+'</text>'+
+   (focus?'<g class="c1-fig-polarity"><circle cx="'+d.minus[0]+'" cy="'+d.minus[1]+'" r="12" fill="#fff" stroke="'+d.color+'" stroke-width="1.5"/><text x="'+d.minus[0]+'" y="'+(d.minus[1]+5)+'" text-anchor="middle">−</text><circle cx="'+d.plus[0]+'" cy="'+d.plus[1]+'" r="12" fill="#fff" stroke="'+d.color+'" stroke-width="1.5"/><text x="'+d.plus[0]+'" y="'+(d.plus[1]+5)+'" text-anchor="middle">+</text></g>':'')+
+   '</g>';
+ }).join("");
+ const defs=Object.entries(EINTHOVEN_LEADS).map(([key,d])=>'<marker id="c1-arrow-'+key+'" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="'+d.color+'"/></marker>').join("");
+ const nodes=[
+  {id:"BD",x:120,y:106},{id:"BI",x:520,y:106},{id:"PI",x:320,y:357}
+ ].map(n=>'<g class="c1-fig-node"><circle cx="'+n.x+'" cy="'+n.y+'" r="34"/><text x="'+n.x+'" y="'+(n.y+7)+'" text-anchor="middle">'+n.id+'</text></g>').join("");
+ return '<svg class="c1-triangle" viewBox="0 0 640 415" role="img" aria-label="Triángulo de Einthoven. Seleccionada '+active+'. El polo positivo es '+selected.positive+' y el negativo es '+selected.negative+'. Las extremidades son brazo derecho, brazo izquierdo y pierna izquierda.">'+
+ '<defs>'+defs+'<linearGradient id="c1-node-fill" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f7fdfc"/><stop offset="1" stop-color="#e9f4f2"/></linearGradient></defs>'+
+ '<rect width="640" height="415" rx="22" fill="#f8fbfa"/>'+
+ '<path d="M120 106H520L320 357Z" fill="#e8f2f0" fill-opacity=".45" stroke="#cadbdc" stroke-width="1.7" stroke-dasharray="7 10"/>'+
+ activePath+nodes+'</svg>';
 }
 function potCell(id,label,value){
  return '<label class="c1-range-label"><span>'+label+'</span><strong data-c1-display="'+id+'">'+fixed(value)+' mV</strong><input type="range" data-c1-potential="'+id+'" min="-1.5" max="1.5" step="0.1" value="'+value+'" aria-label="'+label+'"/></label>';
 }
 function lawTool(){
  const p=state.potential,v=leads(p),test=POTENTIAL_CASES[state.potPractice%2],practice=state.mode==="practice";
- const result=state.potFeedback;
- return title("DI, DII y DIII: una misma actividad, tres derivaciones","Cada derivación resta el potencial de su polo negativo al de su polo positivo. Aprende primero qué significan las letras.")+
- '<div class="c1-panel"><div class="c1-mode"><button data-c1-mode="learn" class="'+(!practice?"selected":"")+'">Aprender</button><button data-c1-mode="practice" class="'+(practice?"selected":"")+'">Practicar</button></div>'+
- '<div class="c1-two-grid c1-einthoven-layout"><div>'+einthovenGraphic()+'</div><div><h3>Significado de los polos</h3>'+
- '<div class="c1-lead-def"><strong class="c1-color-di">DI</strong><span>BI (+) − BD (−)</span><small>Brazo izquierdo menos brazo derecho</small></div>'+
- '<div class="c1-lead-def"><strong class="c1-color-dii">DII</strong><span>PI (+) − BD (−)</span><small>Pierna izquierda menos brazo derecho</small></div>'+
- '<div class="c1-lead-def"><strong class="c1-color-diii">DIII</strong><span>PI (+) − BI (−)</span><small>Pierna izquierda menos brazo izquierdo</small></div>'+
- '<p class="c1-muted">BD = brazo derecho, BI = brazo izquierdo, PI = pierna izquierda. Las flechas señalan la dirección del polo negativo al positivo.</p></div></div>'+
- (practice?'<div class="c1-practice-box"><p class="c1-question">Ejercicio '+(state.potPractice+1)+'/2 · '+test.question+'</p><div class="c1-answer-grid">'+getOptions(test).map((choice,i)=>'<button type="button" data-c1-pot-answer="'+choice+'" '+(result?"disabled":"")+'>'+fixed(choice)+' mV</button>').join("")+'</div>'+
- (result?'<div class="c1-feedback '+(result.ok?"good":"bad")+'" role="status"><strong>'+(result.ok?"Correcto":"Revisa los polos y los signos")+'</strong><p>'+esc(result.reason)+'</p></div><button class="btn secondary" data-c1-action="'+(result.ok?"next-pot":"retry-pot")+'">'+(result.ok?"Continuar →":"Reintentar")+'</button>':'')+'</div>':
- '<div class="c1-parameter-grid"><h3>Modifica los potenciales de las extremidades</h3><p class="c1-muted">Valores instantáneos simulados, no amplitudes de ondas medidas en momentos diferentes.</p>'+potCell("bd","Brazo derecho (BD)",p.bd)+potCell("bi","Brazo izquierdo (BI)",p.bi)+potCell("pi","Pierna izquierda (PI)",p.pi)+
- '<div class="c1-results"><div><span>DI = BI − BD</span><strong data-c1-lead="di">'+fixed(v.di)+'</strong><small>mV</small></div><div><span>DII = PI − BD</span><strong data-c1-lead="dii">'+fixed(v.dii)+'</strong><small>mV</small></div><div><span>DIII = PI − BI</span><strong data-c1-lead="diii">'+fixed(v.diii)+'</strong><small>mV</small></div></div>'+
- '<div class="c1-comment" data-c1-equation>Comprobación: '+fixed(v.di)+' + ('+fixed(v.diii)+') = '+fixed(v.dii)+' mV</div><button type="button" data-c1-action="reset-pots" class="btn secondary">Restablecer ejemplo</button></div>')+
- '</div><p class="c1-muted">Un ECG estándar utiliza 10 electrodos para registrar 12 derivaciones. El triángulo es una representación didáctica; la relación DII = DI + DIII procede de restar potenciales simultáneos.</p>';
+ const selected=EINTHOVEN_LEADS[state.selectedLead],result=state.potFeedback;
+ const guidance='<div class="c1-lead-intro"><strong>Una derivación no es un electrodo.</strong><p>Compara el potencial eléctrico de dos puntos: al polo positivo se le resta el polo negativo.</p></div>';
+ const legend='<div class="c1-sites" aria-label="Referencias anatómicas del esquema">'+
+ [['BD','Brazo derecho'],['BI','Brazo izquierdo'],['PI','Pierna izquierda']].map(([abbr,name])=>'<div class="c1-site"><span class="c1-site-abbr">'+abbr+'</span><span>'+name+'</span></div>').join("")+'</div>';
+ const leadButtons='<div class="c1-lead-choices" role="group" aria-label="Seleccionar derivación">'+Object.keys(EINTHOVEN_LEADS).map(key=>{
+  const d=EINTHOVEN_LEADS[key],active=state.selectedLead===key;
+  return '<button type="button" data-c1-select-lead="'+key+'" class="c1-lead-choice '+(active?'selected':'')+'" aria-pressed="'+active+'" style="--lead-color:'+d.color+'"><strong>'+key+'</strong><span>'+d.negative+' → '+d.positive+'</span></button>';
+ }).join("")+'</div>';
+ const detail='<div class="c1-selected-detail" aria-live="polite" style="--lead-color:'+selected.color+'"><div class="c1-selected-heading"><span class="c1-dot"></span><strong>Derivación '+state.selectedLead+'</strong></div>'+
+ '<div class="c1-pole-pair"><div><span>Polo negativo (−)</span><strong>'+selected.negative+'</strong></div><div><span>Polo positivo (+)</span><strong>'+selected.positive+'</strong></div></div>'+
+ '<p class="c1-math-line"><strong>'+state.selectedLead+'</strong> = '+selected.formula+'</p></div>';
+ return title("Comprender las derivaciones","Cómo se forman DI, DII y DIII y qué significan sus polos.")+
+ '<div class="c1-panel c1-einthoven-panel"><div class="c1-mode" role="group" aria-label="Modo de uso"><button data-c1-mode="learn" class="'+(!practice?'selected':'')+'">Aprender</button><button data-c1-mode="practice" class="'+(practice?'selected':'')+'">Practicar</button></div>'+
+ guidance+'<div class="c1-einthoven-layout"><div class="c1-einthoven-figure"><h3>Triángulo de Einthoven</h3>'+einthovenGraphic(state.selectedLead)+legend+'</div>'+
+ '<div class="c1-einthoven-guide"><h3>Elige una derivación</h3><p class="c1-muted">La flecha va del polo negativo al positivo. Selecciona una derivación y observa qué puntos compara.</p>'+leadButtons+detail+'</div></div>'+
+ (practice?'<div class="c1-practice-box"><p class="c1-question">Ejercicio '+(state.potPractice+1)+'/2 · '+test.question+'</p><div class="c1-answer-grid">'+getOptions(test).map(choice=>'<button type="button" data-c1-pot-answer="'+choice+'" '+(result?'disabled':'')+'>'+fixed(choice)+' mV</button>').join("")+'</div>'+
+ (result?'<div class="c1-feedback '+(result.ok?'good':'bad')+'" role="status"><strong>'+(result.ok?'Correcto':'Revisa los polos y los signos')+'</strong><p>'+esc(result.reason)+'</p></div><button class="btn secondary" data-c1-action="'+(result.ok?'next-pot':'retry-pot')+'">'+(result.ok?'Continuar →':'Reintentar')+'</button>':'')+'</div>':
+ '<div class="c1-parameter-grid"><h3>Comprueba los valores</h3><p class="c1-muted">Modifica los potenciales de las extremidades en un mismo instante.</p>'+potCell('bd','Brazo derecho',p.bd)+potCell('bi','Brazo izquierdo',p.bi)+potCell('pi','Pierna izquierda',p.pi)+
+ '<div class="c1-results"><div><span>DI</span><strong data-c1-lead="di">'+fixed(v.di)+'</strong><small>mV</small></div><div><span>DII</span><strong data-c1-lead="dii">'+fixed(v.dii)+'</strong><small>mV</small></div><div><span>DIII</span><strong data-c1-lead="diii">'+fixed(v.diii)+'</strong><small>mV</small></div></div>'+
+ '<div class="c1-law-result"><strong>Ley de Einthoven</strong><p data-c1-equation>DII = DI + DIII → '+fixed(v.dii)+' = '+fixed(v.di)+' + ('+fixed(v.diii)+') mV</p></div><button type="button" data-c1-action="reset-pots" class="btn secondary">Restablecer ejemplo</button></div>')+
+ '</div><p class="c1-muted">La relación DII = DI + DIII se cumple al comparar potenciales simultáneos. En un ECG estándar se obtienen 12 derivaciones mediante 10 electrodos.</p>';
 }
 function getOptions(t){return t.answer===.5?[1.1,.5,-.5,-1.1]:[-.6,.6,0,1.2]}
 function render(id){
@@ -148,15 +167,16 @@ function evalWaves(value){
 }
 function evalPots(value){
  const t=POTENTIAL_CASES[state.potPractice%2],ok=Math.abs(Number(value)-t.answer)<.005;
- const reason=state.potPractice===0?"DII = DI + DIII = +0,8 + (−0,3) = +0,5 mV.":"DI = BI − BD = +0,6 − 0 = +0,6 mV.";
+ const reason=state.potPractice===0?"DII = DI + DIII = +0,8 + (−0,3) = +0,5 mV." :"DI = brazo izquierdo − brazo derecho = +0,6 − 0 = +0,6 mV.";
  state.potFeedback={ok,reason};
  if(ok){state.potDone.add(state.potPractice);if(state.potDone.size===2)record("einthoven",true,"Resuelve correctamente dos casos aplicando las derivaciones de Einthoven.");}
  else record("einthoven",false,reason);
 }
 if(typeof document!=="undefined"){
  document.body.addEventListener("click",event=>{
-  const el=event.target.closest("[data-c1-phase],[data-c1-mode],[data-c1-wave],[data-c1-concept],[data-c1-pot-answer],[data-c1-action]");if(!el||!document.querySelector("#chapter1-root"))return;
-  if(el.hasAttribute("data-c1-phase"))state.phase=Number(el.dataset.c1Phase);
+  const el=event.target.closest("[data-c1-phase],[data-c1-mode],[data-c1-wave],[data-c1-concept],[data-c1-pot-answer],[data-c1-action],[data-c1-select-lead]");if(!el||!document.querySelector("#chapter1-root"))return;
+  if(el.hasAttribute("data-c1-select-lead"))state.selectedLead=el.dataset.c1SelectLead;
+  else if(el.hasAttribute("data-c1-phase"))state.phase=Number(el.dataset.c1Phase);
   else if(el.hasAttribute("data-c1-mode")){state.mode=el.dataset.c1Mode;state.waveAnswer=null;state.potFeedback=null;state.potPractice=0;state.waveQuestion=0;}
   else if(el.hasAttribute("data-c1-concept")){if(state.conceptAnswer)return;state.conceptAnswer=el.dataset.c1Concept;record("recording",state.conceptAnswer==="voltage","El ECG registra diferencias de potencial en el tiempo, no variables mecánicas.");}
   else if(el.hasAttribute("data-c1-wave")){if(state.mode==="practice"&&state.waveAnswer)return;if(state.mode==="learn")state.wave=el.dataset.c1Wave;else evalWaves(el.dataset.c1Wave);}
@@ -181,8 +201,8 @@ if(typeof document!=="undefined"){
   const rootEl=document.querySelector("#chapter1-root");
   const label=rootEl.querySelector('[data-c1-display="'+key+'"]');if(label)label.textContent=fixed(val)+" mV";
   for(const k of ["di","dii","diii"]){const e=rootEl.querySelector('[data-c1-lead="'+k+'"]');if(e)e.textContent=fixed(v[k]);}
-  const e=rootEl.querySelector("[data-c1-equation]");if(e)e.textContent="Comprobación: "+fixed(v.di)+" + ("+fixed(v.diii)+") = "+fixed(v.dii)+" mV";
+  const e=rootEl.querySelector("[data-c1-equation]");if(e)e.textContent="DII = DI + DIII → "+fixed(v.dii)+" = "+fixed(v.di)+" + ("+fixed(v.diii)+") mV";
  });
 }
-root.ECGChapter1={render,setTopic,activeTopic:"C1.0",leads,questions:qnew,options:getOptions,phases:PHASES,version:"1.0"};
+root.ECGChapter1={render,setTopic,activeTopic:"C1.0",leads,questions:qnew,options:getOptions,phases:PHASES,version:"1.1"};
 })(typeof window!=="undefined"?window:globalThis);
