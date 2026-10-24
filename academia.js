@@ -90,11 +90,10 @@ function practice(){
 }
 function progress(){
  const e=estimate(),pct=Math.round(100*e.completed/e.total);
- return heading("SEGUIMIENTO","Tu aprendizaje","Datos guardados en este navegador. Puedes exportar una copia y reiniciar en cualquier momento.")+
- '<section class="metrics"><article class="metric"><span>Microlecciones estudiadas</span><strong>'+e.completed+' / '+e.total+'</strong></article><article class="metric"><span>Dominio acreditado</span><strong>'+chapters.filter(c=>mastery(c.number)).length+' / 10</strong></article><article class="metric"><span>Respuestas registradas</span><strong>'+S.attempts.length+'</strong></article><article class="metric"><span>Tiempo de estudio</span><strong>'+formatTime(S.seconds)+'</strong></article></section>'+
- '<section class="surface section-gap"><h2>Auditoría del temario</h2><p>El porcentaje de recorrido mide las microlecciones marcadas. El dominio requiere ≥85 % y, para capítulos prácticos, la competencia evaluada. Esta auditoría NO demuestra una validación página por página del PDF original.</p><div class="progress-track"><div class="progress-fill" data-progress="'+pct+'"></div></div><p class="subtle">'+pct+' % recorrido · '+bank.length+' preguntas distribuidas entre '+topics.length+' microlecciones</p><div class="progress-list">'+chapters.map(c=>{const a=chapterAccuracy(c.number),v=c.topics.filter(t=>S.done[t.id]).length;return '<div class="progress-row"><strong>'+c.number+'. '+esc(c.title)+'</strong><span>'+v+'/'+c.topics.length+' lecciones</span><span>'+(a===null?'Sin evaluación':a+' %')+'</span><span>'+statusFor(c.number)+'</span><button class="text-link" data-test-chapter="'+c.number+'">Practicar</button></div>'}).join("")+'</div></section>'+
- '<section class="surface section-gap"><h2>Datos y reinicio</h2><p class="subtle">El progreso es local, no se sincroniza entre dispositivos. Exporta antes de cambiar de navegador o eliminar datos.</p><div class="action-row"><button class="btn secondary" data-action="export">Exportar JSON</button><button class="btn secondary" data-action="import">Importar JSON</button><button class="btn secondary" data-action="reset-chapter">Reiniciar capítulo actual</button><button class="btn danger" data-action="reset-all">Reiniciar todo</button></div></section>'+
- '<section class="surface section-gap"><h2>Fuentes y límites</h2><p>Temario: <em>Aprenda ECG en un día: Un enfoque sistemático</em> (edición española 2014). Texto docente original. Correcciones orientadas a ESC SCA 2023, ESC FA 2024 y Definición universal de IAM 2018. Los trazados son esquemas docentes generados, no señales clínicas obtenidas de pacientes ni certificados diagnósticamente.</p><p>La evaluación clínica y la comprobación integral del temario requieren revisión editorial adicional.</p><p>Instalación en iPhone: abre la aplicación con Safari y utiliza Compartir → Añadir a pantalla de inicio. La instalación offline necesita completar primero la descarga inicial conectada.</p><p id="offlineStatus" class="subtle">Estado sin conexión: recursos locales tras instalación, sujeto a comprobación.</p></section>';
+ return heading("SEGUIMIENTO","Tu aprendizaje","Solo se computa el capítulo aprobado. Los datos anteriores permanecen guardados, pero ocultos.")+
+ '<section class="metrics"><article class="metric"><span>Lecciones estudiadas</span><strong>'+e.completed+' / '+e.total+'</strong></article><article class="metric"><span>Capítulos dominados</span><strong>'+chapters.filter(c=>mastery(c.number)).length+' / '+chapters.length+'</strong></article><article class="metric"><span>Respuestas evaluadas</span><strong>'+S.attempts.filter(a=>questionIds.has(a.id)).length+'</strong></article><article class="metric"><span>Tiempo activo</span><strong>'+formatTime(S.seconds)+'</strong></article></section>'+
+ '<section class="surface section-gap"><h2>Fundamentos del ECG</h2><div class="progress-track"><div class="progress-fill" data-progress="'+pct+'"></div></div><p class="subtle">'+pct+' % del contenido disponible estudiado. El dominio exige al menos un 80 % en el test y superar los ejercicios prácticos.</p><div class="progress-list">'+chapters.map(c=>{const a=chapterAccuracy(c.number),v=c.topics.filter(t=>S.done[t.id]).length;return '<div class="progress-row"><strong>'+c.number+'. '+esc(c.title)+'</strong><span>'+v+'/'+c.topics.length+' lecciones</span><span>'+(a===null?'Sin evaluación':a+' %')+'</span><span>'+statusFor(c.number)+'</span><button class="text-link" data-test-chapter="'+c.number+'">Evaluación</button></div>'}).join("")+'</div></section>'+
+ '<section class="surface section-gap"><h2>Mis datos</h2><p class="subtle">Se guardan en este navegador. La exportación conserva también los resultados antiguos no visibles. Exporta antes de reiniciar.</p><div class="action-row"><button class="btn secondary" data-action="export">Exportar JSON</button><button class="btn secondary" data-action="import">Importar JSON</button><button class="btn secondary" data-action="reset-chapter">Reiniciar capítulo 1</button><button class="btn danger" data-action="reset-all">Reiniciar todo</button></div></section>';
 }
 function questionPool(mode,n){
  const keys=bank.filter(q=>mode==="chapter"?q.chapter===n:mode==="diagnostic"||mode==="final"?true:q.chapter<=Math.max(S.activeChapter,...Array.from(visitedChapters()),1));
@@ -107,7 +106,7 @@ function questionPool(mode,n){
 }
 function shuffled(a){return a.slice().sort(()=>Math.random()-.5)}
 function startQuiz(mode,n){
- const pool=questionPool(mode,n),order=pool.map(q=>shuffled([0,1,2,3]));
+ const pool=questionPool(mode,mode==="chapter"?1:n),order=pool.map(q=>shuffled([0,1,2,3]));
  quiz={mode,n,questions:pool,index:0,answers:[],order,chosen:null,feedback:false};
  page="quiz";render();
 }
@@ -115,7 +114,7 @@ function quizScreen(){
  if(!quiz)return heading("TEST","Sin evaluación activa","Selecciona una modalidad desde Practicar.");
  const q=quiz.questions[quiz.index];
  if(!q)return resultsScreen();
- const labels={diagnostic:"DIAGNÓSTICO INICIAL",chapter:"EVALUACIÓN DE CAPÍTULO",cumulative:"REPASO ACUMULATIVO",final:"EXAMEN FINAL"};
+ const labels={diagnostic:"EVALUACIÓN INICIAL",chapter:"EVALUACIÓN DE CAPÍTULO",cumulative:"REPASO DEL CAPÍTULO",final:"REPASO GENERAL"};
  const chosen=quiz.chosen,opts=quiz.order[quiz.index];
  return '<div class="quiz-wrap"><div class="row-between"><p class="eyebrow">'+labels[quiz.mode]+'</p><span class="pill">Pregunta '+(quiz.index+1)+' / '+quiz.questions.length+'</span></div><div class="progress-track"><div class="progress-fill" data-progress="'+(100*quiz.index/quiz.questions.length)+'"></div></div>'+
  '<article class="surface quiz-panel"><p class="eyebrow">CAPÍTULO '+q.chapter+' · '+esc(getTopic(q.topic).title)+'</p><h2>'+esc(q.question)+'</h2><div class="answer-grid">'+opts.map((original,i)=>'<button class="answer '+(chosen!==null?(original===0?'answer-good':original===chosen?'answer-bad':''):'')+'" data-choice="'+original+'" '+(chosen!==null?'disabled':'')+'><span class="answer-letter">'+String.fromCharCode(65+i)+'</span>'+esc(q.choices[original])+'</button>').join("")+'</div>'+
@@ -160,15 +159,16 @@ function onAction(action){
  case "continue":page="learn";render();break;
  case "cumulative":startQuiz("cumulative");break;
  case "final":startQuiz("final");break;
- case "chapter-test":startQuiz("chapter",Number($("chapterTest")?.value||S.activeChapter));break;
- case "open-axis":S.activeTopic="C7.3";S.activeChapter=7;page="learn";render();break;
- case "open-calculators":page="calculators";render();break;
+ case "chapter-test":startQuiz("chapter",1);break;
+ case "open-axis":page="practice";render();break;
+ case "open-calculators":page="practice";render();break;
  case "lab-conduction":case "lab-vectors":case "lab-placement":case "lab-measurement":{
   const type=action.slice(4),number={conduction:2,vectors:3,placement:5,measurement:6}[type];
+  if(!chapter(number)){page="practice";render();break;}
   window.ECGVisualLab?.prepare(type,"practice");
   S.activeTopic=chapter(number).topics[0].id;S.activeChapter=number;page="learn";render();break;
  }
- case "placement":placementMode=true;placementIndex=0;placementFeedback="";S.activeTopic="C5.1";page="learn";render();break;
+ case "placement":page="practice";render();break;
  case "measurement":page="practice";render();setTimeout(()=>{const el=$("measure-wave");el?.scrollIntoView({block:"center",behavior:"smooth"})},80);break;
  case "clear-measure":measure=[];recentFeedback="";render();break;
  case "prev-topic":case "next-topic":{const i=topics.findIndex(t=>t.id===S.activeTopic);S.activeTopic=topics[Math.max(0,Math.min(topics.length-1,i+(action==="next-topic"?1:-1)))].id;page="learn";render();break}
@@ -189,9 +189,9 @@ document.body.addEventListener("click",e=>{
  const target=e.target.closest("[data-page],[data-chapter],[data-topic],[data-test-chapter],[data-choice],[data-action],[data-electrode],[data-structure],[data-measure],[data-placement-zone]");
  if(!target)return;
  if(target.dataset.page){page=target.dataset.page;render();return}
- if(target.dataset.chapter){S.activeChapter=Number(target.dataset.chapter);S.activeTopic=chapter(S.activeChapter).topics[0].id;page="learn";render();return}
- if(target.dataset.topic){S.activeTopic=target.dataset.topic;page="learn";render();return}
- if(target.dataset.testChapter){startQuiz("chapter",Number(target.dataset.testChapter));return}
+ if(target.dataset.chapter){const n=Number(target.dataset.chapter);if(!chapter(n))return;S.activeChapter=n;S.activeTopic=chapter(n).topics[0].id;page="learn";render();return}
+ if(target.dataset.topic){if(!topics.some(t=>t.id===target.dataset.topic))return;S.activeTopic=target.dataset.topic;page="learn";render();return}
+ if(target.dataset.testChapter){if(!chapter(Number(target.dataset.testChapter)))return;startQuiz("chapter",Number(target.dataset.testChapter));return}
  if(target.dataset.action){onAction(target.dataset.action);return}
  if(target.dataset.electrode){selectedElectrode=target.dataset.electrode;if(page==="learn")render();return}
  if(target.dataset.structure){$("diagramFeedback").textContent=target.dataset.structure+": estructura señalada en el sistema de conducción.";return}
@@ -229,7 +229,7 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
 let lastInteraction=Date.now();
 document.addEventListener("pointerdown",()=>lastInteraction=Date.now(),{passive:true});
 document.addEventListener("keydown",()=>lastInteraction=Date.now());
-setInterval(()=>{if(!document.hidden&&S.pretest&&Date.now()-lastInteraction<60000){S.seconds+=15;save()}},15000);
+setInterval(()=>{if(!document.hidden&&Date.now()-lastInteraction<60000){S.seconds+=15;save()}},15000);
 function updateOfflineStatus(){
  const indicator=$("connectionIndicator"),info=$("offlineStatus");
  const online=navigator.onLine!==false;
@@ -239,7 +239,7 @@ function updateOfflineStatus(){
    if(info)info.textContent=ready?"Los recursos educativos principales ya están guardados para utilizarse sin conexión en este navegador.":"El modo offline requiere instalar el service worker y completar la carga inicial conectada.";
  };
  if(typeof caches==="undefined"){set(false);return;}
- caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v9-")))).catch(()=>set(false));
+ caches.keys().then(keys=>set(keys.some(k=>k.startsWith("ecg-academia-v10-")))).catch(()=>set(false));
 }
 if("serviceWorker" in navigator)window.addEventListener("load",()=>{
  navigator.serviceWorker.register("./sw.js").then(()=>navigator.serviceWorker.ready).then(updateOfflineStatus).catch(updateOfflineStatus);
